@@ -1,0 +1,30 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Career-Ops Capture settings</title>
+<body style="font: 14px system-ui; max-width: 640px; margin: 2rem auto; color: #1a1a1a">
+  <h1>Career-Ops Capture</h1>
+  <p>
+    <span
+      id="mode"
+      style="background: #e6f4ea; color: #137333; padding: 2px 8px; border-radius: 10px"
+      >passive mode</span
+    >
+  </p>
+  <p style="color: #555">
+    Passive, personal-use capture of your own logged-in curated feeds. Reads only pages you open;
+    never scrolls, clicks, or navigates on its own.
+  </p>
+  <label>Dashboard token <input id="token" type="password" style="width: 100%" /></label
+  ><br /><br />
+  <label>career-ops API port <input id="port" type="number" value="3000" /></label><br /><br />
+  <label>Soft cap (captures/hour warning) <input id="cap" type="number" value="60" /></label
+  ><br /><br />
+  <label>
+    <input id="tier3" type="checkbox" /> Enable tier-3 MAIN-world fetch tap (higher account risk;
+    off by default)
+  </label>
+  <h2>Portals</h2>
+  <div id="portals"></div>
+  <p><button id="save">Save</button> <span id="status"></span></p>
+  <script type="module" src="./options.js"></script>
+</body>

@@ -1,0 +1,46 @@
+{
+  "_FIXTURE_NOTE": "SYNTHETIC PLACEHOLDER, not a real LinkedIn capture. Shapes mirror the documented Voyager included[] jobPosting pattern the parser targets. Contains no PII or real job IDs. Replace with a real PII-scrubbed capture before release (see src/sites/linkedin/fixtures/README.md).",
+  "data": {
+    "$type": "com.linkedin.restli.common.CollectionResponse",
+    "*elements": [
+      "urn:li:fsd_jobPostingCard:3901234567",
+      "urn:li:fsd_jobPostingCard:3902345678",
+      "urn:li:fsd_jobPostingCard:3903456789"
+    ]
+  },
+  "included": [
+    {
+      "$type": "com.linkedin.voyager.dash.jobs.JobPostingCard",
+      "entityUrn": "urn:li:fsd_jobPostingCard:3901234567",
+      "title": "Vice President of Marketing",
+      "primarySubtitle": { "text": "Northwind Analytics" },
+      "secondarySubtitle": { "text": "Austin, TX (Remote)" },
+      "relevanceInsight": {
+        "text": {
+          "text": "Top Applicant. You are among the first 25 applicants. 92% match. Easy Apply"
+        }
+      }
+    },
+    {
+      "$type": "com.linkedin.voyager.dash.jobs.JobPostingCard",
+      "entityUrn": "urn:li:fsd_jobPostingCard:3902345678",
+      "title": "Head of Growth Marketing",
+      "companyName": "Cascade Robotics",
+      "formattedLocation": "Seattle, WA",
+      "jobInsights": [{ "text": "88% match. Actively recruiting. Easy Apply" }]
+    },
+    {
+      "$type": "com.linkedin.voyager.dash.jobs.JobPostingCard",
+      "entityUrn": "urn:li:fsd_jobPostingCard:3903456789",
+      "title": "Director, Product Marketing",
+      "primarySubtitle": { "text": "Meridian Health" },
+      "secondarySubtitle": { "text": "Chicago, IL" },
+      "footerItems": [{ "text": "Posted 3 days ago" }, { "text": "Over 100 applicants" }]
+    },
+    {
+      "$type": "com.linkedin.voyager.dash.organization.Company",
+      "entityUrn": "urn:li:fsd_company:1122334",
+      "name": "Northwind Analytics"
+    }
+  ]
+}
