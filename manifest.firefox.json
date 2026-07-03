@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Career-Ops Capture",
+  "version": "0.1.0",
+  "description": "Capture curated job listings from your own logged-in session and send them to your local career-ops app.",
+  "permissions": ["storage", "activeTab", "scripting", "alarms", "tabs"],
+  "host_permissions": ["https://www.linkedin.com/*", "http://127.0.0.1/*"],
+  "background": { "service_worker": "background/service-worker.js", "type": "module" },
+  "action": { "default_popup": "ui/popup.html", "default_title": "Career-Ops Capture" },
+  "options_ui": { "page": "ui/options.html", "open_in_tab": true },
+  "content_scripts": [
+    {
+      "matches": ["https://www.linkedin.com/*"],
+      "js": ["content/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    { "resources": ["content/inject.js"], "matches": ["https://www.linkedin.com/*"] }
+  ],
+  "browser_specific_settings": { "gecko": { "id": "career-ops-capture@rubicon" } },
+  "icons": {}
+}

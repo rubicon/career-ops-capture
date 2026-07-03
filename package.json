@@ -1,0 +1,62 @@
+{
+  "name": "career-ops-capture",
+  "version": "0.1.0",
+  "description": "Capture curated job listings from your own logged-in session and send them to your local career-ops app.",
+  "license": "MIT",
+  "author": "Dax Davis <dax@rubicontv.com>",
+  "homepage": "https://github.com/rubicon/career-ops-capture#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rubicon/career-ops-capture.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rubicon/career-ops-capture/issues"
+  },
+  "keywords": [
+    "browser-extension",
+    "chrome-extension",
+    "manifest-v3",
+    "mv3",
+    "job-search",
+    "linkedin",
+    "career-ops"
+  ],
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "build:firefox": "TARGET=firefox node esbuild.mjs",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "validate": "node scripts/validate-manifest.mjs",
+    "package": "npm run build && node scripts/package.mjs"
+  },
+  "dependencies": {
+    "webextension-polyfill": "^0.12.0"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.6.1",
+    "@commitlint/config-conventional": "^19.6.0",
+    "@eslint/js": "^9.17.0",
+    "@types/chrome": "^0.0.287",
+    "@types/jsdom": "^28.0.3",
+    "@types/node": "^22.0.0",
+    "@types/webextension-polyfill": "^0.12.1",
+    "archiver": "^7.0.1",
+    "esbuild": "^0.25.0",
+    "eslint": "^9.17.0",
+    "eslint-config-prettier": "^9.1.0",
+    "globals": "^15.14.0",
+    "jsdom": "^25.0.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.19.0",
+    "vitest": "^3.2.0"
+  }
+}
