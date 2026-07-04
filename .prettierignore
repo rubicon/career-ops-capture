@@ -3,3 +3,10 @@ node_modules/
 web-ext-artifacts/
 package-lock.json
 CHANGELOG.md
+
+# release-please rewrites the version in these via a JSON reserializer that
+# expands arrays one-per-line, which prettier --check would reject. Cede their
+# formatting to release-please so release PRs pass CI. Correctness is still
+# guarded by `npm run validate`. See issue #17.
+manifest.json
+manifest.firefox.json
