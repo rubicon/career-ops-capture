@@ -1,6 +1,6 @@
 {
   "name": "career-ops-capture",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Capture curated job listings from your own logged-in session and send them to your local career-ops app.",
   "license": "MIT",
   "author": "Dax Davis <dax@rubicontv.com>",
