@@ -2,4 +2,11 @@ dist/
 node_modules/
 web-ext-artifacts/
 package-lock.json
+
+# release-please rewrites these on each release with its own JSON/Markdown
+# serialization, which does not match Prettier. Excluded so format:check does
+# not fail on machine-generated release commits. Structure is still enforced by
+# npm run validate (manifests) and release-please itself.
 CHANGELOG.md
+manifest.json
+manifest.firefox.json
