@@ -13,15 +13,33 @@ jobs:
     name: Propose release
     runs-on: ubuntu-latest
     steps:
+      # App credentials come from 1Password at runtime (single source of truth in
+      # the Automation vault). Only OP_SERVICE_ACCOUNT_TOKEN lives as a repo secret;
+      # the app id + private key never leave 1Password.
+      #
+      # The item is addressed by its UUID, not its title. Titles are mutable: a
+      # rename of this item once broke every release run in these repos. A UUID
+      # cannot drift that way. It identifies the rubicon-release-please GitHub App
+      # key and is an address, not a secret.
+      - name: Load app credentials from 1Password
+        id: op
+        uses: 1password/load-secrets-action@eb2efd0703da22a93c467f2d1ffbb6826c11e19c # v4.1.1
+        with:
+          export-env: false
+          version: 2.35.0
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          RELEASE_PLEASE_APP_ID: "op://Automation/lnacky4l2tmlihrockbutkub7y/app id"
+          RELEASE_PLEASE_APP_KEY: "op://Automation/lnacky4l2tmlihrockbutkub7y/private key"
+
       # A GitHub App token gives release-please a signing identity, so the
-      # commits it creates are verified. Wire the RELEASE_PLEASE_APP_ID and
-      # RELEASE_PLEASE_APP_KEY secrets before this workflow can run. See README.
+      # commits it creates are verified.
       - name: Mint app token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: app-token
         with:
-          app-id: ${{ secrets.RELEASE_PLEASE_APP_ID }}
-          private-key: ${{ secrets.RELEASE_PLEASE_APP_KEY }}
+          app-id: ${{ steps.op.outputs.RELEASE_PLEASE_APP_ID }}
+          private-key: ${{ steps.op.outputs.RELEASE_PLEASE_APP_KEY }}
 
       - name: Run release-please
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
