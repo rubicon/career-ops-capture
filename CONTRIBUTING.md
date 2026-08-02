@@ -6,7 +6,7 @@ get merged.
 
 ## Development setup
 
-You need Node.js 18 or newer.
+You need Node.js 22.12.0 or newer.
 
 ```bash
 git clone https://github.com/rubicon/career-ops-capture.git
