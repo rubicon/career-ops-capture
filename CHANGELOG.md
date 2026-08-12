@@ -5,6 +5,13 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2](https://github.com/rubicon/career-ops-capture/compare/v0.1.1...v0.1.2) (2026-08-12)
+
+
+### Bug Fixes
+
+* **ci:** stop requesting an Issues scope the release App does not grant ([#49](https://github.com/rubicon/career-ops-capture/issues/49)) ([a21e75f](https://github.com/rubicon/career-ops-capture/commit/a21e75f57dda680df3b90cda1e6f05f451a979c3)), closes [#48](https://github.com/rubicon/career-ops-capture/issues/48)
+
 ## [0.1.1](https://github.com/rubicon/career-ops-capture/compare/v0.1.0...v0.1.1) (2026-07-04)
 
 
