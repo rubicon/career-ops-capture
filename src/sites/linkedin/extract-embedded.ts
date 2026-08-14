@@ -1,4 +1,4 @@
-import type { CapturedRecord, Signals } from "../../core/types";
+import type { CapturedRecord, Signals, TierExtraction } from "../../core/types";
 
 const SOURCE = "linkedin-topapplicant";
 
@@ -62,20 +62,24 @@ function signalsFromInsight(text: string): Signals {
   return s;
 }
 
-export function extractEmbedded(
-  doc: Document,
-  _url: string,
-): { records: CapturedRecord[]; recognized: boolean } {
+export function extractEmbedded(doc: Document, _url: string): TierExtraction {
   const models = readEmbeddedModels(doc);
-  if (models.length === 0) return { records: [], recognized: false };
+  // No model blocks parsed at all, so this tier has nothing to say about the page.
+  if (models.length === 0) return { records: [], recognized: false, cardCount: 0, droppedCount: 0 };
   const cards = models.filter(isJobCard);
   const records: CapturedRecord[] = [];
   const seen = new Set<string>();
+  let droppedCount = 0;
   for (const e of cards) {
     const id = pickJobId(e);
     const title = pickTitle(e);
     const company = pickCompany(e);
-    if (!id || !title || !company) continue;
+    // A card we cannot name is a card lost. Count it: a churned id/title/company
+    // accessor drops every card at once, which the caller must not read as success.
+    if (!id || !title || !company) {
+      droppedCount++;
+      continue;
+    }
     const url = `https://www.linkedin.com/jobs/view/${id}/`;
     if (seen.has(url)) continue;
     seen.add(url);
@@ -89,7 +93,9 @@ export function extractEmbedded(
       capturedAt: new Date().toISOString(),
     });
   }
-  // "recognized" = we found job-card entities in a shape we understand, even if a
-  // churned insight path yielded no signals. Drives fail-loud / tier-2 fallback.
-  return { records, recognized: cards.length > 0 };
+  // "recognized" = the model blocks parsed, so this tier read the page. It is
+  // deliberately not "cards.length > 0": a curated collection can legitimately
+  // hold no jobs, and that is a clean empty capture rather than an unread page.
+  // Whether zero records here is legitimate is the module's call, off the counts.
+  return { records, recognized: true, cardCount: cards.length, droppedCount };
 }

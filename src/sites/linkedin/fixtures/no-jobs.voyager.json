@@ -1,0 +1,15 @@
+{
+  "_FIXTURE_NOTE": "SYNTHETIC PLACEHOLDER, not a real LinkedIn capture. Models a curated collection that hydrates normally and genuinely holds no job postings: the model blocks parse, included[] carries no job-card entity. This is the legitimate empty capture, and it must not be confused with a churned accessor. Contains no PII or real job IDs.",
+  "data": {
+    "$type": "com.linkedin.restli.common.CollectionResponse",
+    "*elements": [],
+    "paging": { "count": 0, "start": 0, "total": 0 }
+  },
+  "included": [
+    {
+      "$type": "com.linkedin.voyager.dash.search.SearchClusterViewModel",
+      "entityUrn": "urn:li:fsd_searchClusterViewModel:jobs-empty",
+      "totalResultCount": 0
+    }
+  ]
+}

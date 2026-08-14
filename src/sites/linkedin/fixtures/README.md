@@ -9,6 +9,11 @@ real job IDs:
   consumed by the tier-1 parser in `extract-embedded.ts`.
 - `cards.html` is a rendered job-card list `<ul>`. It is consumed by the tier-2
   parser in `extract-dom.ts`.
+- `churned-title.voyager.json` is the same payload shape with the title key
+  renamed, so every card fails the required-field guard. It pins the rule that a
+  recognized page yielding zero records falls back and then fails loud.
+- `no-jobs.voyager.json` is a collection that hydrates normally and holds no job
+  postings. It pins the opposite rule: that case is a clean empty capture.
 
 ## Before any release, replace with a real, PII-scrubbed capture
 

@@ -58,8 +58,10 @@ storage area, and the real `fetch`, and hand them to the pure core.
 
 ## Extraction tiers
 
-LinkedIn extraction runs least-detectable first. Each tier reports whether it
-recognized the page shape, which drives the fallback and the fail-loud behavior.
+LinkedIn extraction runs least-detectable first. Each tier reports what it saw:
+whether it recognized the page shape, how many job cards it found, and how many it
+had to drop for a missing id, title, or company. Those three drive the fallback and
+the fail-loud behavior.
 
 1. **Embedded model JSON, isolated world.** LinkedIn hydrates the page from model
    JSON in hidden `<code>` blocks. Reading them from the extension's isolated
@@ -73,9 +75,13 @@ recognized the page shape, which drives the fallback and the fail-loud behavior.
    fetches. This is the only code that touches the page runtime, it is off by
    default, and it never initiates a request of its own.
 
-If no tier recognizes the page, the module throws `ExtractorShapeError`. The
-service worker turns the toolbar badge red and sets a title that says the
-extractor needs updating. Nothing is silently dropped.
+If no tier recognizes the page, the module throws `ExtractorShapeError`. So does a
+tier that found job cards and extracted no record from any of them: that is a
+churned accessor, not an empty page, and reporting it as a capture would drop every
+job on the page silently. Only a tier that read the page and found no job cards at
+all produces a legitimate zero-record capture. On the error the service worker
+turns the toolbar badge red and sets a title that says the extractor needs
+updating. Nothing is silently dropped.
 
 ## Site-module interface
 

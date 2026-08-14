@@ -56,4 +56,30 @@ describe("extractEmbedded", () => {
     const doc = new JSDOM("<!doctype html><body><p>hello</p></body>").window.document;
     expect(extractEmbedded(doc, "https://www.linkedin.com/feed/").recognized).toBe(false);
   });
+
+  it("drops no card from the healthy fixture", () => {
+    const r = extractEmbedded(docWithEmbedded(raw), CURATED);
+    expect(r.cardCount).toBe(3);
+    expect(r.droppedCount).toBe(0);
+  });
+
+  // The two cases the caller has to tell apart: a page that really holds no jobs,
+  // and a page whose job cards we can no longer read.
+  it("reports a genuinely empty collection as zero cards, zero dropped", () => {
+    const empty = readFileSync("src/sites/linkedin/fixtures/no-jobs.voyager.json", "utf-8");
+    const r = extractEmbedded(docWithEmbedded(empty), CURATED);
+    expect(r.recognized).toBe(true);
+    expect(r.cardCount).toBe(0);
+    expect(r.droppedCount).toBe(0);
+    expect(r.records).toEqual([]);
+  });
+
+  it("reports a churned title accessor as cards found and every card dropped", () => {
+    const churned = readFileSync("src/sites/linkedin/fixtures/churned-title.voyager.json", "utf-8");
+    const r = extractEmbedded(docWithEmbedded(churned), CURATED);
+    expect(r.recognized).toBe(true);
+    expect(r.cardCount).toBe(2);
+    expect(r.droppedCount).toBe(2);
+    expect(r.records).toEqual([]);
+  });
 });
