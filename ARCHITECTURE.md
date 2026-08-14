@@ -68,7 +68,8 @@ no jobs. Those drive the fallback and the fail-loud behavior. The card counts cl
    JSON in hidden `<code>` blocks. Reading them from the extension's isolated
    world is invisible to the page and yields the richest data. This is the
    default and the preferred tier.
-2. **Rendered DOM cards, isolated world.** If no embedded models are found, the
+2. **Rendered DOM cards, isolated world.** Whenever tier 1 produces no record,
+   whether it found no models or read models it could not turn into records, the
    parser falls back to scraping the visible job-card DOM. Still isolated-world,
    lower fidelity.
 3. **MAIN-world fetch tap, gated.** If both fail to supply a needed signal, an
@@ -96,7 +97,12 @@ override tier 1's: its card selector ends in a bare `[data-job-id]`, which also
 matches the split-view detail pane and rails rendered beside an empty list.
 
 On the error the service worker turns the toolbar badge red and sets a title that
-says the extractor needs updating. Nothing is silently dropped.
+says the extractor needs updating. No whole page is silently dropped.
+
+One gap is open and deliberate: a tier that reads most of its cards and drops a few
+still returns a capture, and `droppedCount` reaches no further than the error string.
+A partial drop is therefore counted but not yet surfaced to the user. Widening the
+signal to cover it is tracked separately.
 
 ## Site-module interface
 
