@@ -13,7 +13,11 @@ real job IDs:
   renamed, so every card fails the required-field guard. It pins the rule that a
   recognized page yielding zero records falls back and then fails loud.
 - `no-jobs.voyager.json` is a collection that hydrates normally and holds no job
-  postings. It pins the opposite rule: that case is a clean empty capture.
+  postings. It pins the opposite rule: that case is a clean empty capture. Its
+  `included` is deliberately empty and must stay that way. The empty-state signal
+  has to come from the collection block itself (`*elements` and `paging.total`); if
+  the fixture carried a filler entity, the test would pass on a parser that only
+  counts entities and still throws on the real shape.
 
 ## Before any release, replace with a real, PII-scrubbed capture
 

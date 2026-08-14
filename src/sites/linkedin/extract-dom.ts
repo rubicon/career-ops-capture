@@ -27,12 +27,27 @@ function signalsFrom(t: string): Signals {
   return s;
 }
 
+// The rendered DOM cannot state that a collection is empty. No card container matched
+// is equally "this page has no jobs" and "CARD stopped matching", so this tier never
+// confirms an empty state; only the embedded collection payload can.
+const EMPTY_STATE_CONFIRMED = false;
+
 export function extractDom(doc: Document, _url: string): TierExtraction {
   const cards = Array.from(doc.querySelectorAll(CARD));
-  if (cards.length === 0) return { records: [], recognized: false, cardCount: 0, droppedCount: 0 };
+  if (cards.length === 0) {
+    return {
+      records: [],
+      recognized: false,
+      cardCount: 0,
+      droppedCount: 0,
+      duplicateCount: 0,
+      emptyStateConfirmed: EMPTY_STATE_CONFIRMED,
+    };
+  }
   const records: CapturedRecord[] = [];
   const seen = new Set<string>();
   let droppedCount = 0;
+  let duplicateCount = 0;
   for (const card of cards) {
     const link = card.querySelector<HTMLAnchorElement>(LINK);
     const href = link?.getAttribute("href") ?? "";
@@ -46,7 +61,11 @@ export function extractDom(doc: Document, _url: string): TierExtraction {
       continue;
     }
     const url = `https://www.linkedin.com/jobs/view/${idm[1]}/`;
-    if (seen.has(url)) continue;
+    // Counted, not just skipped, for the same reason the drop above is counted.
+    if (seen.has(url)) {
+      duplicateCount++;
+      continue;
+    }
     seen.add(url);
     const insight = Array.from(card.querySelectorAll(INSIGHT))
       .map((e) => text(e))
@@ -61,5 +80,12 @@ export function extractDom(doc: Document, _url: string): TierExtraction {
       capturedAt: new Date().toISOString(),
     });
   }
-  return { records, recognized: true, cardCount: cards.length, droppedCount };
+  return {
+    records,
+    recognized: true,
+    cardCount: cards.length,
+    droppedCount,
+    duplicateCount,
+    emptyStateConfirmed: EMPTY_STATE_CONFIRMED,
+  };
 }

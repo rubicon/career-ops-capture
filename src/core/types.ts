@@ -25,10 +25,20 @@ export interface TierExtraction {
   records: CapturedRecord[];
   // The tier understood the page shape: model blocks parsed, or card containers matched.
   recognized: boolean;
-  // Job cards the tier saw before reading any field off them.
+  // Job cards the tier saw before reading any field off them. The three buckets below
+  // close over it: records.length + droppedCount + duplicateCount === cardCount.
   cardCount: number;
-  // Cards discarded because a required field (id, title, company) came back empty.
+  // Cards discarded: a required field (id, title, company) came back empty, or the
+  // card the page named resolved to no entity at all.
   droppedCount: number;
+  // Cards skipped because an earlier card already produced the same job url.
+  duplicateCount: number;
+  // The tier read a positive statement from the page that it holds no job postings,
+  // as opposed to merely matching nothing. Only that distinguishes an empty page from
+  // a page whose card detection churned, so only that may return a zero-record
+  // capture instead of failing loud. A tier with no such signal available reports
+  // false and defers to one that has it.
+  emptyStateConfirmed: boolean;
 }
 
 export type AuthState = "authed" | "logged-out" | "unknown";

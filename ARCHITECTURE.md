@@ -59,9 +59,10 @@ storage area, and the real `fetch`, and hand them to the pure core.
 ## Extraction tiers
 
 LinkedIn extraction runs least-detectable first. Each tier reports what it saw:
-whether it recognized the page shape, how many job cards it found, and how many it
-had to drop for a missing id, title, or company. Those three drive the fallback and
-the fail-loud behavior.
+whether it recognized the page shape, how many job cards it found, how many it had
+to drop or skip as a duplicate, and whether the page positively stated that it holds
+no jobs. Those drive the fallback and the fail-loud behavior. The card counts close:
+`records + dropped + duplicates == cardCount`.
 
 1. **Embedded model JSON, isolated world.** LinkedIn hydrates the page from model
    JSON in hidden `<code>` blocks. Reading them from the extension's isolated
@@ -78,10 +79,24 @@ the fail-loud behavior.
 If no tier recognizes the page, the module throws `ExtractorShapeError`. So does a
 tier that found job cards and extracted no record from any of them: that is a
 churned accessor, not an empty page, and reporting it as a capture would drop every
-job on the page silently. Only a tier that read the page and found no job cards at
-all produces a legitimate zero-record capture. On the error the service worker
-turns the toolbar badge red and sets a title that says the extractor needs
-updating. Nothing is silently dropped.
+job on the page silently.
+
+A zero-record capture is only legitimate when the page positively says it holds no
+jobs. Tier 1 reads that statement from the collection block it hydrates: an
+`*elements` list that names no job posting urn, a `paging.total` that agrees, and no
+job-posting entity in `included` anyway. Those key on urn strings and counts rather
+than on `$type`, so they still hold when the entity types the accessors read are
+renamed, and a rename then reports cards found and none extracted instead of an
+empty page. Recognizing the page shape alone is not that statement: a non-jobs
+interstitial hydrates model blocks too.
+
+Tier 2 has no such statement available. No matching card container is equally "no
+jobs" and "the selector churned", so it never confirms an empty state, and it cannot
+override tier 1's: its card selector ends in a bare `[data-job-id]`, which also
+matches the split-view detail pane and rails rendered beside an empty list.
+
+On the error the service worker turns the toolbar badge red and sets a title that
+says the extractor needs updating. Nothing is silently dropped.
 
 ## Site-module interface
 

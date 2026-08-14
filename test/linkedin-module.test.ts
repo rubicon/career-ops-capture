@@ -82,4 +82,40 @@ describe("linkedInModule", () => {
     const doc = docWith(fixture("no-jobs.voyager.json"));
     expect(linkedInModule.extract({ doc, url: CURATED })).toEqual([]);
   });
+
+  // Tier 1 reads the collection payload the page hydrated, so it is the authority on
+  // how many job postings the page holds. Tier 2's card selector ends in a bare
+  // [data-job-id], which also matches the split-view detail pane and rail chrome the
+  // page renders next to an empty list. One such node must not turn tier 1's
+  // confirmed "no jobs here" into a red badge.
+  it("keeps a confirmed empty capture when a stray [data-job-id] node starves tier 2", () => {
+    const doc = docWith(fixture("no-jobs.voyager.json"), '<div data-job-id="3901234567"></div>');
+    expect(linkedInModule.extract({ doc, url: CURATED })).toEqual([]);
+  });
+
+  // The mirror of the rule above: without a positive empty-state signal we cannot
+  // tell an empty page from a page we stopped understanding, so we fail loud.
+  it("throws when models parsed but nothing states the collection is empty", () => {
+    const doc = docWith(
+      JSON.stringify({
+        included: [{ $type: "com.linkedin.voyager.common.Nav", entityUrn: "urn:li:nav:1" }],
+      }),
+    );
+    expect(() => linkedInModule.extract({ doc, url: CURATED })).toThrow(ExtractorShapeError);
+  });
+
+  it("throws when the card entity types churn and the element list still names cards", () => {
+    const doc = docWith(
+      JSON.stringify({
+        data: { "*elements": ["urn:li:fsd_jobPostingCard:3901234567"] },
+        included: [
+          {
+            $type: "com.linkedin.voyager.dash.jobs.HiringOpportunityTile",
+            entityUrn: "urn:li:x:1",
+          },
+        ],
+      }),
+    );
+    expect(() => linkedInModule.extract({ doc, url: CURATED })).toThrow(/1 job cards/);
+  });
 });
