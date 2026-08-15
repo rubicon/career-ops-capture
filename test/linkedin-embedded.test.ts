@@ -10,10 +10,16 @@ import { extractEmbedded } from "../src/sites/linkedin/extract-embedded";
 //   location         : included[].secondarySubtitle.text | included[].formattedLocation
 //   Top-Applicant/%  : included[].relevanceInsight.text.text | jobInsights[].text | footerItems[].text
 
-function docWithEmbedded(json: string): Document {
-  // LinkedIn hydrates from hidden <code> blocks; replicate that shape.
-  const html = `<!doctype html><body><code id="bpr-guid-1" style="display:none">${json.replace(/</g, "\\u003c")}</code></body>`;
-  return new JSDOM(html).window.document;
+function docWithEmbedded(...blocks: string[]): Document {
+  // LinkedIn hydrates from hidden <code> blocks; replicate that shape. A real page
+  // carries several of them, one per collection it hydrated.
+  const codes = blocks
+    .map(
+      (json, i) =>
+        `<code id="bpr-guid-${i + 1}" style="display:none">${json.replace(/</g, "\\u003c")}</code>`,
+    )
+    .join("");
+  return new JSDOM(`<!doctype html><body>${codes}</body>`).window.document;
 }
 
 const CURATED = "https://www.linkedin.com/jobs/collections/top-applicant/";
@@ -204,5 +210,75 @@ describe("extractEmbedded", () => {
     expect(r.emptyStateConfirmed).toBe(false);
     expect(r.cardCount).toBe(1);
     expect(r.records.length).toBe(1);
+  });
+
+  // The same rule, one block over. An element list scopes to the block that carries
+  // it, so a page hydrating a job collection *and* a second block of job cards must
+  // yield both: reading the whole document off the first list drops every card the
+  // list does not happen to name, which is the silent loss this tier exists to stop.
+  const namedCard = {
+    $type: "com.linkedin.voyager.dash.jobs.JobPostingCard",
+    entityUrn: "urn:li:fsd_jobPostingCard:3901234567",
+    title: "Vice President of Marketing",
+    companyName: "Northwind Analytics",
+  };
+  const unnamedCard = {
+    $type: "com.linkedin.voyager.dash.jobs.JobPostingCard",
+    entityUrn: "urn:li:fsd_jobPostingCard:3902345678",
+    title: "Head of Demand Generation",
+    companyName: "Contoso Systems",
+  };
+
+  it("reads cards from a second block that carries no element list of its own", () => {
+    const collection = JSON.stringify({
+      data: { "*elements": [namedCard.entityUrn], paging: { count: 1, start: 0, total: 1 } },
+      included: [namedCard],
+    });
+    const loose = JSON.stringify({ included: [unnamedCard] });
+    const r = extractEmbedded(docWithEmbedded(collection, loose), CURATED);
+    expect(r.cardCount).toBe(2);
+    expect(r.droppedCount).toBe(0);
+    expect(r.records.map((x) => x.role).sort()).toEqual([
+      "Head of Demand Generation",
+      "Vice President of Marketing",
+    ]);
+  });
+
+  it("reads cards from a second block whose element list names no job posting", () => {
+    const collection = JSON.stringify({
+      data: { "*elements": [namedCard.entityUrn], paging: { count: 1, start: 0, total: 1 } },
+      included: [namedCard],
+    });
+    const other = JSON.stringify({
+      data: {
+        "*elements": ["urn:li:fsd_notification:99"],
+        paging: { count: 1, start: 0, total: 1 },
+      },
+      included: [unnamedCard],
+    });
+    const r = extractEmbedded(docWithEmbedded(collection, other), CURATED);
+    expect(r.cardCount).toBe(2);
+    expect(r.records.length).toBe(2);
+  });
+
+  // A `paging.total` describes the collection it ships with. Corroborating one
+  // block's empty element list against another block's total reports a page full of
+  // jobs whenever anything unrelated on it is non-empty, and fails loud on a page
+  // that genuinely holds none.
+  it("confirms an empty collection beside an unrelated block reporting a paging total", () => {
+    const emptyJobs = JSON.stringify({
+      data: { "*elements": [], paging: { count: 0, start: 0, total: 0 } },
+      included: [],
+    });
+    const unrelated = JSON.stringify({
+      data: {
+        "*elements": ["urn:li:fsd_notification:1", "urn:li:fsd_notification:2"],
+        paging: { count: 2, start: 0, total: 25 },
+      },
+      included: [{ $type: "com.linkedin.voyager.common.Nav", entityUrn: "urn:li:nav:1" }],
+    });
+    const r = extractEmbedded(docWithEmbedded(emptyJobs, unrelated), CURATED);
+    expect(r.cardCount).toBe(0);
+    expect(r.emptyStateConfirmed).toBe(true);
   });
 });

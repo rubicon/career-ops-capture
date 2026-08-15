@@ -84,12 +84,21 @@ job on the page silently.
 
 A zero-record capture is only legitimate when the page positively says it holds no
 jobs. Tier 1 reads that statement from the collection block it hydrates: an
-`*elements` list that names no job posting urn, a `paging.total` that agrees, and no
-job-posting entity in `included` anyway. Those key on urn strings and counts rather
-than on `$type`, so they still hold when the entity types the accessors read are
-renamed, and a rename then reports cards found and none extracted instead of an
-empty page. Recognizing the page shape alone is not that statement: a non-jobs
-interstitial hydrates model blocks too.
+`*elements` list that names no job posting urn, a `paging.total` **from that same
+block** that agrees, and no job-posting entity in `included` anywhere. Those key on
+urn strings and counts rather than on `$type`, so they still hold when the entity
+types the accessors read are renamed, and a rename then reports cards found and none
+extracted instead of an empty page. Recognizing the page shape alone is not that
+statement: a non-jobs interstitial hydrates model blocks too.
+
+Every statement a block makes is scoped to that block, because a page hydrates one
+per collection and each describes only itself. So a block's element list selects the
+cards of that block only, and a block that names no job posting falls back to the
+`$type` hint over its own entities rather than being read as "there are none" — a
+page hydrating a job collection plus a second block of cards must yield both.
+Likewise a `paging.total` corroborates only the element list it shipped with:
+comparing an empty jobs collection against an unrelated collection's total would put
+a red badge on a page that genuinely has no jobs.
 
 Tier 2 has no such statement available. No matching card container is equally "no
 jobs" and "the selector churned", so it never confirms an empty state, and it cannot

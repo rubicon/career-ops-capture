@@ -104,6 +104,56 @@ describe("linkedInModule", () => {
     expect(() => linkedInModule.extract({ doc, url: CURATED })).toThrow(ExtractorShapeError);
   });
 
+  // Two hydrated collections, job cards in both. Scoping the whole document to the
+  // first block's element list returns a green badge and half the page.
+  it("captures job cards from every hydrated block, not just the one with an element list", () => {
+    const card = (id: string, role: string) => ({
+      $type: "com.linkedin.voyager.dash.jobs.JobPostingCard",
+      entityUrn: `urn:li:fsd_jobPostingCard:${id}`,
+      title: role,
+      companyName: "Northwind Analytics",
+    });
+    const first = card("3901234567", "Vice President of Marketing");
+    const second = card("3902345678", "Head of Demand Generation");
+    const html =
+      '<!doctype html><body><code id="bpr-guid-1" style="display:none">' +
+      JSON.stringify({
+        data: { "*elements": [first.entityUrn], paging: { count: 1, start: 0, total: 1 } },
+        included: [first],
+      }) +
+      '</code><code id="bpr-guid-2" style="display:none">' +
+      JSON.stringify({ included: [second] }) +
+      "</code></body>";
+    const doc = new JSDOM(html).window.document;
+    const records = linkedInModule.extract({ doc, url: CURATED });
+    expect(records.map((r) => r.role).sort()).toEqual([
+      "Head of Demand Generation",
+      "Vice President of Marketing",
+    ]);
+  });
+
+  // An unrelated collection's paging total says nothing about the jobs collection.
+  // Reading them together puts a red badge on a page that genuinely has no jobs.
+  it("returns an empty capture when an empty jobs block sits beside a busy unrelated one", () => {
+    const html =
+      '<!doctype html><body><code id="bpr-guid-1" style="display:none">' +
+      JSON.stringify({
+        data: { "*elements": [], paging: { count: 0, start: 0, total: 0 } },
+        included: [],
+      }) +
+      '</code><code id="bpr-guid-2" style="display:none">' +
+      JSON.stringify({
+        data: {
+          "*elements": ["urn:li:fsd_notification:1"],
+          paging: { count: 1, start: 0, total: 25 },
+        },
+        included: [{ $type: "com.linkedin.voyager.common.Nav", entityUrn: "urn:li:nav:1" }],
+      }) +
+      "</code></body>";
+    const doc = new JSDOM(html).window.document;
+    expect(linkedInModule.extract({ doc, url: CURATED })).toEqual([]);
+  });
+
   it("throws when the card entity types churn and the element list still names cards", () => {
     const doc = docWith(
       JSON.stringify({

@@ -2,33 +2,30 @@ import type { CapturedRecord, Signals, TierExtraction } from "../../core/types";
 
 const SOURCE = "linkedin-topapplicant";
 
-// What the hidden <code> blocks told us. A Voyager collection payload carries the
-// hydrated entities in `included`, and the collection's own description of itself in
-// `data`: `*elements` lists the urn of every element on the page, and `paging.total`
-// counts them. Those two are the page's own statement of how many jobs it holds, and
-// they key on urn strings and counts rather than on `$type`, so they survive a rename
-// of the entity types the accessors below read.
-interface ModelScan {
-  // Model blocks that parsed. This, not the entity count, is what says the tier read
-  // the page: a collection that holds nothing still hydrates a block, with `included`
-  // empty, and that is a page we understood rather than a page we failed to parse.
-  blockCount: number;
+// What one hidden <code> block told us. A Voyager collection payload carries its
+// hydrated entities in `included`, and its own description of itself in `data`:
+// `*elements` names the urn of every element in that collection, and `paging.total`
+// counts them. Those two key on urn strings and counts rather than on `$type`, so
+// they survive a rename of the entity types the accessors below read.
+//
+// A page hydrates several of these, one per collection, and each describes only
+// itself. Merging them reads one collection's statement as a statement about the
+// whole page, which is how a second block's job cards get dropped and how an
+// unrelated busy collection masks an empty jobs one. So the scan keeps them apart.
+interface ModelBlock {
   included: any[];
-  // `*elements` entries across every parsed block, and whether any block carried one.
-  elementUrns: string[];
-  hasElementList: boolean;
-  // Largest `paging.total` seen, or null when no block reported one.
+  // This block's `*elements`, or null when it carried none. Empty and absent are
+  // different: an empty list is the collection saying it holds nothing.
+  elementUrns: string[] | null;
+  // This block's `paging.total`, or null when it reported none.
   pagingTotal: number | null;
 }
 
-function scanEmbeddedModels(doc: Document): ModelScan {
-  const scan: ModelScan = {
-    blockCount: 0,
-    included: [],
-    elementUrns: [],
-    hasElementList: false,
-    pagingTotal: null,
-  };
+// Blocks that parsed. Their count, not the entity count, is what says the tier read
+// the page: a collection that holds nothing still hydrates a block, with `included`
+// empty, and that is a page we understood rather than a page we failed to parse.
+function scanEmbeddedModels(doc: Document): ModelBlock[] {
+  const blocks: ModelBlock[] = [];
   for (const el of Array.from(doc.querySelectorAll("code"))) {
     const text = el.textContent?.trim();
     if (!text || text[0] !== "{") continue;
@@ -42,17 +39,21 @@ function scanEmbeddedModels(doc: Document): ModelScan {
     const data = obj?.data;
     const hasData = !!data && typeof data === "object";
     if (!hasIncluded && !hasData) continue;
-    scan.blockCount++;
-    if (hasIncluded) scan.included.push(...obj.included);
     const elements = hasData ? data["*elements"] : undefined;
-    if (Array.isArray(elements)) {
-      scan.hasElementList = true;
-      scan.elementUrns.push(...elements.filter((u: unknown): u is string => typeof u === "string"));
-    }
     const total = hasData ? data.paging?.total : undefined;
-    if (typeof total === "number") scan.pagingTotal = Math.max(scan.pagingTotal ?? 0, total);
+    blocks.push({
+      included: hasIncluded ? obj.included : [],
+      elementUrns: Array.isArray(elements)
+        ? elements.filter((u: unknown): u is string => typeof u === "string")
+        : null,
+      pagingTotal: typeof total === "number" ? total : null,
+    });
   }
-  return scan;
+  return blocks;
+}
+
+function allIncluded(blocks: ModelBlock[]): any[] {
+  return blocks.flatMap((b) => b.included);
 }
 
 const JOB_URN = /jobposting/i;
@@ -105,41 +106,72 @@ function signalsFromInsight(text: string): Signals {
   return s;
 }
 
-// The cards on the page are whichever entities the collection's element list names,
-// because that list is what the page itself calls its contents. Returns the entities
-// to read, plus the count of named cards that resolved to no entity at all: those are
-// cards we lost, not cards the page does not have.
+// The cards on the page are whichever entities the collections' element lists name,
+// because those lists are what the page itself calls its contents. Returns the
+// entities to read, plus the count of named cards that resolved to no entity at all:
+// those are cards we lost, not cards the page does not have.
 //
-// An element list only describes the one collection it belongs to, so a list naming
-// no job posting is not a statement that the page has none: a second block can carry
-// the cards outside it. In that case, and when no block carried a list at all, the
-// `$type` hint is all we have and we read every entity it matches.
-function selectCards(scan: ModelScan): { cards: any[]; unresolved: number } {
-  const jobUrns = scan.elementUrns.filter((u) => JOB_URN.test(u));
-  if (jobUrns.length === 0) {
-    return { cards: scan.included.filter(mentionsJobPosting), unresolved: 0 };
-  }
+// Scoping is per block, because an element list only describes the collection it
+// belongs to. A block whose list names no job posting is not saying the page has
+// none: the cards can live in a sibling block, hydrated loose or through a different
+// collection. For such a block, and for one carrying no list at all, the `$type` hint
+// is all we have and we read every entity of that block it matches. Deciding the
+// whole document off the first list that names a job urn is how the cards outside it
+// disappear.
+function selectCards(blocks: ModelBlock[]): { cards: any[]; unresolved: number } {
+  // Element urns resolve against every entity on the page, not only the ones that
+  // arrived in the same block: a collection routinely names elements a sibling block
+  // hydrated. Only the *scoping* is per block; the lookup table is not.
   const byUrn = new Map<string, any>();
-  for (const e of scan.included) {
+  for (const e of allIncluded(blocks)) {
     const urn = e?.entityUrn;
     if (typeof urn === "string" && !byUrn.has(urn)) byUrn.set(urn, e);
   }
   const cards: any[] = [];
+  // Keyed by urn where there is one, else by the entity itself, so a card two blocks
+  // both claim is counted once rather than reported as a duplicate capture.
+  const taken = new Set<unknown>();
   let unresolved = 0;
-  for (const urn of jobUrns) {
-    // The urn already said this element is a job posting, so we do not re-test the
-    // entity's `$type`: that is the field most likely to have been renamed.
-    const e = byUrn.get(urn);
-    if (e) cards.push(e);
-    else unresolved++;
+  for (const block of blocks) {
+    const jobUrns = (block.elementUrns ?? []).filter((u) => JOB_URN.test(u));
+    if (jobUrns.length > 0) {
+      for (const urn of jobUrns) {
+        if (taken.has(urn)) continue;
+        taken.add(urn);
+        // The urn already said this element is a job posting, so we do not re-test
+        // the entity's `$type`: that is the field most likely to have been renamed.
+        const e = byUrn.get(urn);
+        if (e) cards.push(e);
+        else unresolved++;
+      }
+      continue;
+    }
+    for (const e of block.included) {
+      if (!mentionsJobPosting(e)) continue;
+      const key = typeof e?.entityUrn === "string" ? e.entityUrn : e;
+      if (taken.has(key)) continue;
+      taken.add(key);
+      cards.push(e);
+    }
   }
   return { cards, unresolved };
 }
 
+// A collection states it is empty when it hydrated an element list, that list names
+// no job posting, and its own `paging.total` agrees. The total has to come from the
+// same block as the list it corroborates: a page's unrelated collections report their
+// own totals, and reading one of those against the jobs list turns a genuinely empty
+// page into a red badge.
+function blockConfirmsEmpty(block: ModelBlock): boolean {
+  if (block.elementUrns === null) return false;
+  if (block.elementUrns.some((u) => JOB_URN.test(u))) return false;
+  return block.pagingTotal === null || block.pagingTotal === 0;
+}
+
 export function extractEmbedded(doc: Document, _url: string): TierExtraction {
-  const scan = scanEmbeddedModels(doc);
+  const blocks = scanEmbeddedModels(doc);
   // No model blocks parsed at all, so this tier has nothing to say about the page.
-  if (scan.blockCount === 0) {
+  if (blocks.length === 0) {
     return {
       records: [],
       recognized: false,
@@ -149,17 +181,16 @@ export function extractEmbedded(doc: Document, _url: string): TierExtraction {
       emptyStateConfirmed: false,
     };
   }
-  const { cards, unresolved } = selectCards(scan);
-  // The page states it is empty when it hydrated a collection, that collection names
-  // no job posting, its paging total agrees, and no job-posting entity came along
-  // anyway. Anything short of all four leaves us unable to tell an empty page from a
+  const { cards, unresolved } = selectCards(blocks);
+  // The page states it is empty when some collection on it says so on its own terms,
+  // no card was selected or lost anywhere, and no job-posting entity came along
+  // anyway. Anything short of all three leaves us unable to tell an empty page from a
   // page we stopped understanding, and the module fails loud on that.
   const emptyStateConfirmed =
-    scan.hasElementList &&
+    blocks.some(blockConfirmsEmpty) &&
     cards.length === 0 &&
     unresolved === 0 &&
-    !scan.included.some(mentionsJobPosting) &&
-    (scan.pagingTotal === null || scan.pagingTotal === 0);
+    !allIncluded(blocks).some(mentionsJobPosting);
   const records: CapturedRecord[] = [];
   const seen = new Set<string>();
   let droppedCount = unresolved;
