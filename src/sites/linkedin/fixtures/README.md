@@ -9,6 +9,15 @@ real job IDs:
   consumed by the tier-1 parser in `extract-embedded.ts`.
 - `cards.html` is a rendered job-card list `<ul>`. It is consumed by the tier-2
   parser in `extract-dom.ts`.
+- `churned-title.voyager.json` is the same payload shape with the title key
+  renamed, so every card fails the required-field guard. It pins the rule that a
+  recognized page yielding zero records falls back and then fails loud.
+- `no-jobs.voyager.json` is a collection that hydrates normally and holds no job
+  postings. It pins the opposite rule: that case is a clean empty capture. Its
+  `included` is deliberately empty and must stay that way. The empty-state signal
+  has to come from the collection block itself (`*elements` and `paging.total`); if
+  the fixture carried a filler entity, the test would pass on a parser that only
+  counts entities and still throws on the real shape.
 
 ## Before any release, replace with a real, PII-scrubbed capture
 
@@ -21,6 +30,13 @@ reliably. To refresh:
    outer HTML.
 3. Scrub personal data (your member id and any personal identifiers) but keep the
    job fields.
+   While you are there, capture a collection that is genuinely **empty** (filter a
+   curated collection down to no results) and record whether its block ships a
+   `paging` object and whether that object carries `total`. That is the one open
+   question behind `blockConfirmsEmpty`: an absent total currently does not withdraw
+   an empty `*elements` list, because Rest.li omits `total` when the resource has
+   none. A real empty capture is what would let that be tightened without
+   red-badging ordinary empty pages.
 4. Overwrite these fixtures, run `npm test`, and reconcile only the `pick*` /
    selector accessors in `extract-embedded.ts` / `extract-dom.ts` if a path
    assertion fails. Do not weaken the URL or shape assertions.
