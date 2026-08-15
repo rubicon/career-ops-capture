@@ -30,6 +30,13 @@ reliably. To refresh:
    outer HTML.
 3. Scrub personal data (your member id and any personal identifiers) but keep the
    job fields.
+   While you are there, capture a collection that is genuinely **empty** (filter a
+   curated collection down to no results) and record whether its block ships a
+   `paging` object and whether that object carries `total`. That is the one open
+   question behind `blockConfirmsEmpty`: an absent total currently does not withdraw
+   an empty `*elements` list, because Rest.li omits `total` when the resource has
+   none. A real empty capture is what would let that be tightened without
+   red-badging ordinary empty pages.
 4. Overwrite these fixtures, run `npm test`, and reconcile only the `pick*` /
    selector accessors in `extract-embedded.ts` / `extract-dom.ts` if a path
    assertion fails. Do not weaken the URL or shape assertions.

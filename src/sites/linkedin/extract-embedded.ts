@@ -162,6 +162,35 @@ function selectCards(blocks: ModelBlock[]): { cards: any[]; unresolved: number }
 // same block as the list it corroborates: a page's unrelated collections report their
 // own totals, and reading one of those against the jobs list turns a genuinely empty
 // page into a red badge.
+//
+// An ABSENT total still confirms, and that is deliberate rather than an oversight.
+// The element list is the positive statement — the collection saying it holds
+// nothing. The total is here to catch a *contradiction* (list empty, total says 25,
+// so do not trust the list); with no total there is no contradiction, only less
+// corroboration. Requiring a present zero instead would fail loud on every empty
+// collection whose payload omits it, which is the false-red-badge class this parser
+// exists to avoid: a badge that fires on ordinary empty pages stops meaning "jobs
+// were lost" on the pages where jobs really were.
+//
+// Neither paging field is usable as a damage signal here, per Rest.li's own server
+// (`restli-server/.../RestUtils.buildMetadata`), the framework this payload's `$type`
+// names:
+//   - `metadata.removeTotal()` runs whenever the resource supplies no total, so an
+//     absent total is ordinary output, not a truncated payload. `total` is likewise
+//     defaulted (`total: int = 0`) in CollectionMetadata, i.e. optional on the wire.
+//   - `metadata.setCount(pagingContext.getCount())` takes count from the *request's*
+//     paging context, not from the elements returned, so a non-zero count beside an
+//     empty list is "asked for 20, got 0" — an empty page, not a contradiction.
+//
+// What remains genuinely undecidable with the evidence available: a payload that is
+// semantically incomplete (`*elements: []`, `included: []`) is byte-identical to a
+// collection that is simply empty. Byte truncation is not the shape in question —
+// that fails `JSON.parse` and never becomes a block at all. Separating the two needs
+// a signal this payload does not carry: a real capture establishing whether curated
+// collections always ship paging, or the rendered "no matching jobs" empty state.
+// Until one of those exists we default to trusting the element list, because the
+// other three conjuncts at the call site already require that no card was selected,
+// none was lost, and no job-posting entity arrived anywhere on the page.
 function blockConfirmsEmpty(block: ModelBlock): boolean {
   if (block.elementUrns === null) return false;
   if (block.elementUrns.some((u) => JOB_URN.test(u))) return false;

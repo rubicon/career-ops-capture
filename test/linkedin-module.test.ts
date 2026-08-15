@@ -154,6 +154,16 @@ describe("linkedInModule", () => {
     expect(linkedInModule.extract({ doc, url: CURATED })).toEqual([]);
   });
 
+  // The user-visible half of the paging decision: a collection that states it is
+  // empty and ships no `paging.total` gets a clean empty capture, not a red badge.
+  // Rest.li omits `total` whenever the resource supplies none, so requiring a present
+  // zero would put the "jobs were lost" badge on an ordinary empty page — and a badge
+  // that fires on normal pages stops meaning anything on the pages that matter.
+  it("returns an empty capture when the empty collection carries no paging total", () => {
+    const doc = docWith(JSON.stringify({ data: { "*elements": [] }, included: [] }));
+    expect(linkedInModule.extract({ doc, url: CURATED })).toEqual([]);
+  });
+
   it("throws when the card entity types churn and the element list still names cards", () => {
     const doc = docWith(
       JSON.stringify({

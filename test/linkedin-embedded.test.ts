@@ -281,4 +281,43 @@ describe("extractEmbedded", () => {
     expect(r.cardCount).toBe(0);
     expect(r.emptyStateConfirmed).toBe(true);
   });
+
+  // The three tests below pin the decision that an absent `paging.total` does not
+  // withdraw an empty element list's statement. See the comment on
+  // `blockConfirmsEmpty` for why. They exist because the suite could not previously
+  // tell that rule from its opposite: requiring a present zero left every test green.
+  it("confirms an empty collection whose payload carries no paging at all", () => {
+    const payload = JSON.stringify({ data: { "*elements": [] }, included: [] });
+    const r = extractEmbedded(docWithEmbedded(payload), CURATED);
+    expect(r.cardCount).toBe(0);
+    expect(r.emptyStateConfirmed).toBe(true);
+  });
+
+  // Rest.li's own server drops `total` from the payload whenever the resource does
+  // not supply one (`RestUtils.buildMetadata` calls `metadata.removeTotal()`), and
+  // sets `count` from the *request's* paging context rather than from the elements
+  // returned. So paging present, count non-zero, total absent, elements empty is the
+  // ordinary shape of an empty page, not a damaged one. Reading either field as a
+  // contradiction here red-badges a page that simply has no jobs.
+  it("confirms an empty collection when paging omits total and count is the page size", () => {
+    const payload = JSON.stringify({
+      data: { "*elements": [], paging: { start: 0, count: 20 } },
+      included: [],
+    });
+    expect(extractEmbedded(docWithEmbedded(payload), CURATED).emptyStateConfirmed).toBe(true);
+  });
+
+  it("confirms an empty collection carrying no paging beside a sibling reporting a total", () => {
+    const emptyJobs = JSON.stringify({ data: { "*elements": [] }, included: [] });
+    const unrelated = JSON.stringify({
+      data: {
+        "*elements": ["urn:li:fsd_notification:1"],
+        paging: { count: 1, start: 0, total: 25 },
+      },
+      included: [{ $type: "com.linkedin.voyager.common.Nav", entityUrn: "urn:li:nav:1" }],
+    });
+    expect(
+      extractEmbedded(docWithEmbedded(emptyJobs, unrelated), CURATED).emptyStateConfirmed,
+    ).toBe(true);
+  });
 });

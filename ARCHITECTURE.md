@@ -100,6 +100,19 @@ Likewise a `paging.total` corroborates only the element list it shipped with:
 comparing an empty jobs collection against an unrelated collection's total would put
 a red badge on a page that genuinely has no jobs.
 
+The element list is the statement; the total only corroborates it. A total that
+contradicts the list (empty list, total 25) withdraws the confirmation, but a total
+that is simply **absent** does not, because Rest.li — the framework the payload's
+`$type` names — drops `total` whenever the resource supplies none, and takes
+`paging.count` from the request rather than from the elements returned. Neither
+field's absence or size is evidence of a damaged payload. That leaves one case this
+parser cannot decide: a semantically incomplete block is byte-identical to an empty
+collection. It is resolved in favour of the empty capture, since the surrounding
+conditions already require that no card was selected, none was lost, and no
+job-posting entity is present anywhere on the page. Deciding it the other way would
+red-badge ordinary empty pages, and a badge that fires routinely no longer carries
+the "jobs were lost" meaning the rest of this design depends on.
+
 Tier 2 has no such statement available. No matching card container is equally "no
 jobs" and "the selector churned", so it never confirms an empty state, and it cannot
 override tier 1's: its card selector ends in a bare `[data-job-id]`, which also
