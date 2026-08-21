@@ -11,7 +11,7 @@ The toolbar has shown Chrome's default puzzle-piece icon since the first release
 
 ### Features
 
-* **ui:** add extension icon set and redesign popup/options UI ([#55](https://github.com/rubicon/career-ops-capture/issues/55)) ([5a12968](https://github.com/rubicon/career-ops-capture/commit/5a12968e42cb84d7a5d597eadf83d6d34cee3c7f))
+* **ui:** add extension icon set and redesign popup/options UI ([#55](https://github.com/rubicon/career-ops-capture/issues/55)) ([0265e24](https://github.com/rubicon/career-ops-capture/commit/0265e243b8b1575f30f4c6ecfc29ee2beced9fc4))
 
 **Full Changelog**: https://github.com/rubicon/career-ops-capture/compare/v0.1.3...v0.1.4
 
@@ -20,21 +20,21 @@ The toolbar has shown Chrome's default puzzle-piece icon since the first release
 
 ### Bug Fixes
 
-* **linkedin:** fail loud when a recognized page yields zero records ([#51](https://github.com/rubicon/career-ops-capture/issues/51)) ([01bdaf5](https://github.com/rubicon/career-ops-capture/commit/01bdaf5e3445728c52544134380b51e11a5c62a0))
+* **linkedin:** fail loud when a recognized page yields zero records ([#51](https://github.com/rubicon/career-ops-capture/issues/51)) ([37e325a](https://github.com/rubicon/career-ops-capture/commit/37e325abc11a0f20d19639b2c3ebfedd7d73b2c2))
 
 ## [0.1.2](https://github.com/rubicon/career-ops-capture/compare/v0.1.1...v0.1.2) (2026-08-12)
 
 
 ### Bug Fixes
 
-* **ci:** stop requesting an Issues scope the release App does not grant ([#49](https://github.com/rubicon/career-ops-capture/issues/49)) ([a21e75f](https://github.com/rubicon/career-ops-capture/commit/a21e75f57dda680df3b90cda1e6f05f451a979c3)), closes [#48](https://github.com/rubicon/career-ops-capture/issues/48)
+* **ci:** stop requesting an Issues scope the release App does not grant ([#49](https://github.com/rubicon/career-ops-capture/issues/49)) ([c8546a6](https://github.com/rubicon/career-ops-capture/commit/c8546a6664cb9a1d87e66e943347872af4abe2f7)), closes [#48](https://github.com/rubicon/career-ops-capture/issues/48)
 
 ## [0.1.1](https://github.com/rubicon/career-ops-capture/compare/v0.1.0...v0.1.1) (2026-07-04)
 
 
 ### Features
 
-* initial public release of career-ops-capture ([e05dd93](https://github.com/rubicon/career-ops-capture/commit/e05dd933a49429c03ba48bf251bee3eda3c33433))
+* initial public release of career-ops-capture ([0ccf418](https://github.com/rubicon/career-ops-capture/commit/0ccf418b738623eb7142695c333acebd09bf7fd1))
 
 ## [0.1.0] - 2026-07-03
 
