@@ -1,30 +1,301 @@
 <!doctype html>
-<meta charset="utf-8" />
-<title>Career-Ops Capture settings</title>
-<body style="font: 14px system-ui; max-width: 640px; margin: 2rem auto; color: #1a1a1a">
-  <h1>Career-Ops Capture</h1>
-  <p>
-    <span
-      id="mode"
-      style="background: #e6f4ea; color: #137333; padding: 2px 8px; border-radius: 10px"
-      >passive mode</span
-    >
-  </p>
-  <p style="color: #555">
-    Passive, personal-use capture of your own logged-in curated feeds. Reads only pages you open;
-    never scrolls, clicks, or navigates on its own.
-  </p>
-  <label>Dashboard token <input id="token" type="password" style="width: 100%" /></label
-  ><br /><br />
-  <label>career-ops API port <input id="port" type="number" value="3000" /></label><br /><br />
-  <label>Soft cap (captures/hour warning) <input id="cap" type="number" value="60" /></label
-  ><br /><br />
-  <label>
-    <input id="tier3" type="checkbox" /> Enable tier-3 MAIN-world fetch tap (higher account risk;
-    off by default)
-  </label>
-  <h2>Portals</h2>
-  <div id="portals"></div>
-  <p><button id="save">Save</button> <span id="status"></span></p>
-  <script type="module" src="./options.js"></script>
-</body>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="color-scheme" content="light" />
+    <title>Career-Ops Capture settings</title>
+    <style>
+      :root {
+        --primary: #1e3a5f;
+        --primary-hover: #16304d;
+        --success-bg: #ecfdf5;
+        --success-fg: #047857;
+        --bg: #f8fafc;
+        --surface: #ffffff;
+        --fg: #0f172a;
+        --muted-fg: #64748b;
+        --border: #e2e8f0;
+        --danger-fg: #b91c1c;
+        --danger-bg: #fef2f2;
+        --danger-border: #fecaca;
+        --radius: 8px;
+        --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: var(--font);
+        font-size: 14px;
+        line-height: 1.55;
+        color: var(--fg);
+        background: var(--bg);
+      }
+
+      .page {
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 40px 24px 64px;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+
+      header img {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: block;
+      }
+
+      header h1 {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        margin: 0;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--success-bg);
+        color: var(--success-fg);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        padding: 4px 10px;
+        border-radius: 999px;
+        margin: 4px 0 16px;
+      }
+
+      .pill::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+
+      .intro {
+        color: var(--muted-fg);
+        margin: 0 0 28px;
+        max-width: 56ch;
+      }
+
+      section {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin-bottom: 20px;
+      }
+
+      section h2 {
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--muted-fg);
+        margin: 0 0 16px;
+      }
+
+      .field {
+        display: block;
+        margin-bottom: 16px;
+      }
+
+      .field:last-child {
+        margin-bottom: 0;
+      }
+
+      .field span.field-label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 6px;
+      }
+
+      .field-help {
+        display: block;
+        font-size: 12px;
+        color: var(--muted-fg);
+        margin-top: 6px;
+      }
+
+      input[type="password"],
+      input[type="number"] {
+        width: 100%;
+        font-family: var(--font);
+        font-size: 14px;
+        color: var(--fg);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 8px 10px;
+        transition:
+          border-color 150ms ease,
+          box-shadow 150ms ease;
+      }
+
+      input[type="password"]:focus,
+      input[type="number"]:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.12);
+      }
+
+      .checkbox-field {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        cursor: pointer;
+      }
+
+      .checkbox-field input[type="checkbox"] {
+        margin-top: 3px;
+        width: 16px;
+        height: 16px;
+        accent-color: var(--primary);
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+
+      .checkbox-field .checkbox-text {
+        font-size: 14px;
+      }
+
+      .checkbox-field .field-help {
+        margin-top: 4px;
+      }
+
+      #portals {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      #portals label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+
+      #portals input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--primary);
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+
+      #portals input[type="checkbox"]:disabled {
+        cursor: not-allowed;
+      }
+
+      #portals span {
+        color: var(--muted-fg) !important;
+        font-size: 13px;
+      }
+
+      .actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      button#save {
+        appearance: none;
+        border: none;
+        background: var(--primary);
+        color: #fff;
+        font-family: var(--font);
+        font-size: 14px;
+        font-weight: 600;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 150ms ease;
+      }
+
+      button#save:hover {
+        background: var(--primary-hover);
+      }
+
+      button#save:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+      }
+
+      #status {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--success-fg);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header>
+        <img src="../icons/icon-48.png" alt="" width="32" height="32" />
+        <h1>Career-Ops Capture</h1>
+      </header>
+      <span class="pill" id="mode">Passive mode</span>
+      <p class="intro">
+        Passive, personal-use capture of your own logged-in curated feeds. Reads only pages you
+        open; never scrolls, clicks, or navigates on its own.
+      </p>
+
+      <section>
+        <h2>Connection</h2>
+        <label class="field">
+          <span class="field-label">Dashboard token</span>
+          <input id="token" type="password" autocomplete="off" />
+        </label>
+        <label class="field">
+          <span class="field-label">career-ops API port</span>
+          <input id="port" type="number" value="3000" />
+        </label>
+      </section>
+
+      <section>
+        <h2>Capture limits</h2>
+        <label class="field">
+          <span class="field-label">Soft cap</span>
+          <input id="cap" type="number" value="60" />
+          <span class="field-help">Warns when captures exceed this many per hour.</span>
+        </label>
+      </section>
+
+      <section>
+        <h2>Advanced</h2>
+        <label class="checkbox-field">
+          <input id="tier3" type="checkbox" />
+          <span>
+            <span class="checkbox-text">Enable tier-3 MAIN-world fetch tap</span>
+            <span class="field-help">Higher account risk. Off by default.</span>
+          </span>
+        </label>
+      </section>
+
+      <section>
+        <h2>Portals</h2>
+        <div id="portals"></div>
+      </section>
+
+      <div class="actions">
+        <button id="save" type="button">Save</button>
+        <span id="status"></span>
+      </div>
+    </div>
+    <script type="module" src="./options.js"></script>
+  </body>
+</html>
