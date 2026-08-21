@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 
+# Per-issue git worktrees
+worktrees/
+
 # Build output
 dist/
 
