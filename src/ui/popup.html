@@ -1,15 +1,235 @@
 <!doctype html>
-<meta charset="utf-8" />
-<body style="font: 13px system-ui; width: 260px; padding: 12px; color: #1a1a1a">
-  <div>
-    <span style="background: #e6f4ea; color: #137333; padding: 2px 8px; border-radius: 10px"
-      >passive mode</span
-    >
-  </div>
-  <p id="count">0 buffered</p>
-  <button id="send">Send captures</button>
-  <button id="relogin" style="display: none">Log in to LinkedIn</button>
-  <p id="msg" style="color: #555"></p>
-  <a href="#" id="opts">Settings</a>
-  <script type="module" src="./popup.js"></script>
-</body>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="color-scheme" content="light" />
+    <title>Career-Ops Capture</title>
+    <style>
+      :root {
+        --primary: #1e3a5f;
+        --primary-hover: #16304d;
+        --success-bg: #ecfdf5;
+        --success-fg: #047857;
+        --bg: #f8fafc;
+        --surface: #ffffff;
+        --fg: #0f172a;
+        --muted-fg: #64748b;
+        --border: #e2e8f0;
+        --danger-bg: #fef2f2;
+        --danger-fg: #b91c1c;
+        --danger-border: #fecaca;
+        --radius: 8px;
+        --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        width: 320px;
+        font-family: var(--font);
+        font-size: 13px;
+        line-height: 1.5;
+        color: var(--fg);
+        background: var(--surface);
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      header img {
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        display: block;
+      }
+
+      header h1 {
+        font-size: 14px;
+        font-weight: 600;
+        margin: 0;
+        letter-spacing: -0.01em;
+      }
+
+      main {
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        align-self: flex-start;
+        background: var(--success-bg);
+        color: var(--success-fg);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        padding: 4px 10px;
+        border-radius: 999px;
+      }
+
+      .pill::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+
+      .stat-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 10px 12px;
+      }
+
+      .stat-row svg {
+        width: 16px;
+        height: 16px;
+        color: var(--muted-fg);
+        flex-shrink: 0;
+      }
+
+      #count {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      button {
+        appearance: none;
+        border: none;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 10px 14px;
+        font-family: var(--font);
+        font-size: 13px;
+        font-weight: 600;
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition:
+          background-color 150ms ease,
+          box-shadow 150ms ease;
+      }
+
+      button#send {
+        background: var(--primary);
+        color: #fff;
+      }
+
+      button#send:hover {
+        background: var(--primary-hover);
+      }
+
+      button#send:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+      }
+
+      button#relogin {
+        background: var(--danger-bg);
+        color: var(--danger-fg);
+        border: 1px solid var(--danger-border);
+      }
+
+      button#relogin:hover {
+        background: #fee2e2;
+      }
+
+      button#relogin:focus-visible {
+        outline: 2px solid var(--danger-fg);
+        outline-offset: 2px;
+      }
+
+      #msg {
+        min-height: 16px;
+        font-size: 12px;
+        color: var(--muted-fg);
+        margin: 0;
+      }
+
+      footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 10px 16px;
+        border-top: 1px solid var(--border);
+      }
+
+      #opts {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--muted-fg);
+        text-decoration: none;
+        cursor: pointer;
+        transition: color 150ms ease;
+      }
+
+      #opts:hover {
+        color: var(--fg);
+      }
+
+      #opts:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+        border-radius: 4px;
+      }
+
+      #opts svg {
+        width: 14px;
+        height: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <img src="../icons/icon-32.png" alt="" width="24" height="24" />
+      <h1>Career-Ops Capture</h1>
+    </header>
+    <main>
+      <span class="pill">Passive mode</span>
+      <div class="stat-row">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M4 6h12M4 10h12M4 14h8" stroke-linecap="round" />
+        </svg>
+        <p id="count">0 buffered</p>
+      </div>
+      <button id="send" type="button">Send captures</button>
+      <button id="relogin" type="button" style="display: none">Log in to LinkedIn</button>
+      <p id="msg"></p>
+    </main>
+    <footer>
+      <a href="#" id="opts">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+          <path
+            d="M15.9 12.1a1.2 1.2 0 0 0 .24 1.32l.04.04a1.45 1.45 0 1 1-2.05 2.05l-.04-.04a1.2 1.2 0 0 0-1.32-.24 1.2 1.2 0 0 0-.73 1.1v.12a1.45 1.45 0 1 1-2.9 0v-.06a1.2 1.2 0 0 0-.79-1.1 1.2 1.2 0 0 0-1.32.24l-.04.04a1.45 1.45 0 1 1-2.05-2.05l.04-.04a1.2 1.2 0 0 0 .24-1.32 1.2 1.2 0 0 0-1.1-.73H3.7a1.45 1.45 0 1 1 0-2.9h.06a1.2 1.2 0 0 0 1.1-.79 1.2 1.2 0 0 0-.24-1.32l-.04-.04A1.45 1.45 0 1 1 6.63 4.3l.04.04a1.2 1.2 0 0 0 1.32.24h.06a1.2 1.2 0 0 0 .73-1.1V3.36a1.45 1.45 0 1 1 2.9 0v.06a1.2 1.2 0 0 0 .73 1.1h.06a1.2 1.2 0 0 0 1.32-.24l.04-.04a1.45 1.45 0 1 1 2.05 2.05l-.04.04a1.2 1.2 0 0 0-.24 1.32v.06a1.2 1.2 0 0 0 1.1.73h.12a1.45 1.45 0 1 1 0 2.9h-.06a1.2 1.2 0 0 0-1.1.73Z"
+          />
+        </svg>
+        Settings
+      </a>
+    </footer>
+    <script type="module" src="./popup.js"></script>
+  </body>
+</html>

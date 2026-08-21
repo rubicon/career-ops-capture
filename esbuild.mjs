@@ -11,6 +11,7 @@ const entries = {
 
 mkdirSync("dist", { recursive: true });
 mkdirSync("dist/ui", { recursive: true });
+mkdirSync("dist/icons", { recursive: true });
 
 await build({
   entryPoints: entries,
@@ -27,5 +28,8 @@ const manifest = process.env.TARGET === "firefox" ? "manifest.firefox.json" : "m
 cpSync(manifest, "dist/manifest.json");
 cpSync("src/ui/options.html", "dist/ui/options.html");
 cpSync("src/ui/popup.html", "dist/ui/popup.html");
+for (const size of [16, 32, 48, 128]) {
+  cpSync(`icons/icon-${size}.png`, `dist/icons/icon-${size}.png`);
+}
 
 console.log(`built dist/ (manifest: ${manifest})`);
