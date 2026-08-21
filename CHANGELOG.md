@@ -5,13 +5,15 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.4](https://github.com/rubicon/career-ops-capture/compare/v0.1.3...v0.1.4) (2026-08-21)
+## Career-Ops Capture v0.1.4 (2026-08-21)
 
+The toolbar has shown Chrome's default puzzle-piece icon since the first release, which said "abandoned side project" louder than anything in the code ever did. Popup and settings also got pulled out of default-browser-chrome and into something that looks like someone meant it. And starting with this release, the release itself ships with an installable zip attached, so "clone it and build it yourself" finally stops being the actual instructions.
 
 ### Features
 
-* **ci:** attach the packaged extension zip to GitHub Releases ([#57](https://github.com/rubicon/career-ops-capture/issues/57)) ([bf0f4b8](https://github.com/rubicon/career-ops-capture/commit/bf0f4b8861d1dc029163429758243d0a52502bd6))
 * **ui:** add extension icon set and redesign popup/options UI ([#55](https://github.com/rubicon/career-ops-capture/issues/55)) ([5a12968](https://github.com/rubicon/career-ops-capture/commit/5a12968e42cb84d7a5d597eadf83d6d34cee3c7f))
+
+**Full Changelog**: https://github.com/rubicon/career-ops-capture/compare/v0.1.3...v0.1.4
 
 ## [0.1.3](https://github.com/rubicon/career-ops-capture/compare/v0.1.2...v0.1.3) (2026-08-15)
 
@@ -33,8 +35,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Features
 
 * initial public release of career-ops-capture ([e05dd93](https://github.com/rubicon/career-ops-capture/commit/e05dd933a49429c03ba48bf251bee3eda3c33433))
-
-## [Unreleased]
 
 ## [0.1.0] - 2026-07-03
 
@@ -63,5 +63,5 @@ Initial public release.
 - A Firefox manifest variant, a unit-test suite over parsing and delivery logic,
   a deterministic manifest validator, and a Web Store packaging script.
 
-[Unreleased]: https://github.com/rubicon/career-ops-capture/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/rubicon/career-ops-capture/compare/v0.1.4...HEAD
 [0.1.0]: https://github.com/rubicon/career-ops-capture/releases/tag/v0.1.0
