@@ -67,8 +67,9 @@ transmission. See [PRIVACY.md](PRIVACY.md) for the full policy.
 
 ## Screenshots
 
-TODO: add popup and options-page screenshots before the first Web Store
-submission. Place them under `docs/screenshots/` and link them here.
+![Popup: passive-mode status, buffered count, Send captures](docs/screenshots/popup.png)
+
+![Options page: connection, capture limits, portals](docs/screenshots/options.png)
 
 ## Install (unpacked, for development)
 
