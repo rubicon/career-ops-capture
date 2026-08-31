@@ -44,9 +44,9 @@
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.0",
     "@eslint/js": "^9.39.5",
-    "@types/chrome": "^0.2.6",
+    "@types/chrome": "^0.2.7",
     "@types/jsdom": "^30.0.0",
-    "@types/node": "^26.2.0",
+    "@types/node": "^26.3.0",
     "@types/webextension-polyfill": "^0.12.1",
     "archiver": "^7.0.1",
     "esbuild": "^0.28.2",
@@ -56,7 +56,7 @@
     "jsdom": "^30.0.1",
     "prettier": "^3.9.6",
     "typescript": "^5.6.0",
-    "typescript-eslint": "^8.67.0",
+    "typescript-eslint": "^8.68.0",
     "vitest": "^4.1.11"
   }
 }
