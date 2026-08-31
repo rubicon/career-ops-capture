@@ -1,6 +1,6 @@
 import { browser } from "../platform/browser";
 import { CaptureBuffer } from "../core/buffer";
-import { drainBuffer } from "../core/drain";
+import { drainBuffer, type DrainResult } from "../core/drain";
 import { loadSettings } from "../core/settings";
 
 const storage = () => browser.storage.local as any;
@@ -43,23 +43,28 @@ browser.runtime.onMessage.addListener(async (msg: any) => {
     await refreshBadge();
   }
   if (msg?.kind === "drain-request") {
-    await drainNow();
+    return await drainNow();
   }
 });
 
-async function drainNow(): Promise<void> {
+// No token gate: /api/explore/add has no auth check and the app has no middleware,
+// so refusing to send without a token only ever blocked delivery to an endpoint that
+// never wanted one. deliver() sends the header when a token is configured.
+async function drainNow(): Promise<DrainResult> {
   const s = await loadSettings(storage());
-  if (!s.token) {
-    await browser.action.setTitle({ title: "Career-Ops Capture: set token in options" });
-    return;
-  }
   const buffer = new CaptureBuffer(storage());
-  await drainBuffer(buffer, { host: "127.0.0.1", port: s.port, token: s.token }, ((
+  const result = await drainBuffer(buffer, { host: "127.0.0.1", port: s.port, token: s.token }, ((
     u: string,
     i: RequestInit,
   ) => fetch(u, i)) as any);
   await refreshBadge();
+  if (result.failed > 0) {
+    await browser.action.setTitle({
+      title: `Career-Ops Capture: ${result.failed} not delivered${result.error ? ` (${result.error})` : ""}`,
+    });
+  }
   await browser.alarms.create("retry", { delayInMinutes: 5 }); // retry leftovers later
+  return result;
 }
 
 browser.alarms.onAlarm.addListener(async (a) => {
