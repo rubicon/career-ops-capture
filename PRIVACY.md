@@ -1,6 +1,6 @@
 # Privacy Policy
 
-_Last updated: 2026-07-03_
+_Last updated: 2026-08-31_
 
 Career-Ops Capture is a browser extension that reads curated job listings you open
 in your own logged-in session and sends them to a career-ops application running
@@ -15,9 +15,10 @@ machine.
 
 ## What the extension reads
 
-When you open a supported LinkedIn curated page ("Top Applicant Jobs" or
-"Recommended for you"), the extension reads the job listings rendered on that
-page. For each listing it extracts:
+When you open a supported LinkedIn page, the extension reads the job listings
+rendered on that page. The supported pages are the curated collections ("Top
+Applicant Jobs" and "Recommended for you") and the job search results pages you
+reach by running a search yourself. For each listing it extracts:
 
 - The job posting URL.
 - The job title.

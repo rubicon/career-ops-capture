@@ -4,6 +4,9 @@ import { JSDOM } from "jsdom";
 import { linkedInModule, ExtractorShapeError } from "../src/sites/linkedin/index";
 
 const CURATED = "https://www.linkedin.com/jobs/collections/top-applicant/";
+// The real shape reached by clicking through from the top-applicant module.
+const SEARCH =
+  "https://www.linkedin.com/jobs/search-results/?currentJobId=4454293053&showHowYouFit=HOW_YOU_FIT&keywords=Vice%20President%20Marketing&origin=QUALIFICATION_LANDING&originToLandingJobPostings=4454293053%2C4448884588%2C4451443188&geoId=90000031";
 
 function fixture(name: string): string {
   return readFileSync(`src/sites/linkedin/fixtures/${name}`, "utf-8");
@@ -23,6 +26,38 @@ describe("linkedInModule", () => {
       true,
     );
     expect(linkedInModule.matches("https://www.linkedin.com/feed/")).toBe(false);
+  });
+
+  it("matches job search results, bare and with the qualification-landing query", () => {
+    expect(linkedInModule.matches(SEARCH)).toBe(true);
+    expect(linkedInModule.matches("https://www.linkedin.com/jobs/search-results/")).toBe(true);
+    expect(linkedInModule.matches("https://www.linkedin.com/jobs/")).toBe(false);
+  });
+
+  it("labels embedded records by the surface they came from", () => {
+    const raw = fixture("top-applicant.voyager.json");
+    // Deduped, so this asserts every record carries the label and that some did.
+    const at = (url: string) => [
+      ...new Set(linkedInModule.extract({ doc: docWith(raw), url }).map((r) => r.source)),
+    ];
+    expect(at(CURATED)).toEqual(["linkedin-topapplicant"]);
+    expect(at(SEARCH)).toEqual(["linkedin-search"]);
+  });
+
+  it("labels DOM records by the surface they came from", () => {
+    const body = fixture("cards.html");
+    const at = (url: string) => [
+      ...new Set(
+        linkedInModule
+          .extract({
+            doc: new JSDOM(`<!doctype html><body>${body}</body>`).window.document,
+            url,
+          })
+          .map((r) => r.source),
+      ),
+    ];
+    expect(at(CURATED)).toEqual(["linkedin-topapplicant"]);
+    expect(at(SEARCH)).toEqual(["linkedin-search"]);
   });
 
   it("throws ExtractorShapeError when neither tier recognizes the page", () => {

@@ -30,8 +30,10 @@ scraping, stored cookies, or a server. It rides the session you already have.
 
 ## Features
 
-- Passive capture of LinkedIn "Top Applicant Jobs" and "Recommended for you"
-  listings from your own logged-in session.
+- Passive capture of LinkedIn "Top Applicant Jobs", "Recommended for you", and
+  job search results listings from your own logged-in session. Each record is
+  labelled with the surface it came from, so a search result never claims to be
+  a top-applicant match.
 - Curation signal capture: Top Applicant flag, match percentage, Easy Apply,
   actively recruiting, recency, and applicant count. Each capture carries a
   human-readable `note` and a compact machine `sig` with a derived priority.
