@@ -145,8 +145,13 @@ the shell does not change.
 
 ## Data flow
 
-1. You open a supported curated page. The content script runs the matching site
-   module in the isolated world.
+1. You open a supported curated page, or reach one by clicking inside LinkedIn.
+   The content script runs the matching site module in the isolated world. A
+   hard load runs on the `load` event; an in-app navigation rewrites the url with
+   `history.pushState` and fires no such event, so the script watches the DOM the
+   page rewrites and captures once the new page settles. `src/core/nav.ts` decides
+   whether a url change is a new list or only another card selected in the list
+   already captured, so moving between cards does not re-extract.
 2. `detectAuthState` gates the run. If it sees a login wall or a logged-out
    marker, the run stops and the popup offers a re-authentication prompt.
 3. `extract` produces normalized `CapturedRecord`s with signals. They are deduped
