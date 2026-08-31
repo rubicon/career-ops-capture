@@ -4,6 +4,11 @@ import { JSDOM } from "jsdom";
 import { linkedInModule, ExtractorShapeError } from "../src/sites/linkedin/index";
 
 const CURATED = "https://www.linkedin.com/jobs/collections/top-applicant/";
+// A real search-results URL, captured from a live session. Reached from the
+// "Jobs where you'd be a top applicant" module, which no longer lands on the
+// collections route.
+const SEARCH =
+  "https://www.linkedin.com/jobs/search-results/?currentJobId=4454293053&showHowYouFit=HOW_YOU_FIT&keywords=Vice%20President%20Marketing&origin=QUALIFICATION_LANDING&originToLandingJobPostings=4454293053%2C4448884588%2C4451443188&geoId=90000031";
 
 function fixture(name: string): string {
   return readFileSync(`src/sites/linkedin/fixtures/${name}`, "utf-8");
@@ -23,6 +28,40 @@ describe("linkedInModule", () => {
       true,
     );
     expect(linkedInModule.matches("https://www.linkedin.com/feed/")).toBe(false);
+  });
+
+  // LinkedIn serves the top-applicant module's own results from the search route,
+  // so a module that claims only /jobs/collections/ captures nothing there.
+  it("matches the job search route", () => {
+    expect(linkedInModule.matches(SEARCH)).toBe(true);
+    expect(linkedInModule.matches("https://www.linkedin.com/jobs/search-results/")).toBe(true);
+  });
+
+  // Claiming the search route must not spill onto the rest of /jobs/.
+  it("does not match a single job detail page or the jobs home", () => {
+    expect(linkedInModule.matches("https://www.linkedin.com/jobs/view/4454293053/")).toBe(false);
+    expect(linkedInModule.matches("https://www.linkedin.com/jobs/")).toBe(false);
+  });
+
+  // A keyword search is not a top-applicant collection. Records that carry the
+  // top-applicant source label while coming from an arbitrary search invent a
+  // curation signal the page never made.
+  it("labels search-route records by their own surface", () => {
+    const body = readFileSync("src/sites/linkedin/fixtures/cards.html", "utf-8");
+    const doc = new JSDOM(`<!doctype html><body>${body}</body>`).window.document;
+    expect(linkedInModule.extract({ doc, url: SEARCH }).map((r) => r.source)).toEqual([
+      "linkedin-search",
+      "linkedin-search",
+      "linkedin-search",
+    ]);
+  });
+
+  it("leaves the collection source label unchanged", () => {
+    const body = readFileSync("src/sites/linkedin/fixtures/cards.html", "utf-8");
+    const doc = new JSDOM(`<!doctype html><body>${body}</body>`).window.document;
+    for (const r of linkedInModule.extract({ doc, url: CURATED })) {
+      expect(r.source).toBe("linkedin-topapplicant");
+    }
   });
 
   it("throws ExtractorShapeError when neither tier recognizes the page", () => {

@@ -12,7 +12,14 @@ export class ExtractorShapeError extends Error {
   }
 }
 
-const CURATED_RE = /linkedin\.com\/jobs\/collections\/(top-applicant|recommended)/i;
+// The curated collections, plus the job search route. LinkedIn serves the
+// "Jobs where you'd be a top applicant" module's own results from
+// /jobs/search-results/, not from /jobs/collections/, so a module that claims
+// only the collections captures nothing on the surface the user actually lands
+// on. A search the user ran themselves is a curated surface for our purposes;
+// see PRIVACY.md, which states that these pages are read.
+const CURATED_RE =
+  /linkedin\.com\/jobs\/(collections\/(top-applicant|recommended)|search-results)/i;
 // Also claim LinkedIn's auth surfaces: a passive open of a curated URL can redirect
 // to a login wall. Claiming these lets detectAuthState() report
 // logged-out and drive the re-auth prompt instead of silently no-module'ing.

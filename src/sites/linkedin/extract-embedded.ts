@@ -1,6 +1,5 @@
 import type { CapturedRecord, Signals, TierExtraction } from "../../core/types";
-
-const SOURCE = "linkedin-topapplicant";
+import { sourceFor } from "./source";
 
 // What one hidden <code> block told us. A Voyager collection payload carries its
 // hydrated entities in `included`, and its own description of itself in `data`:
@@ -197,7 +196,7 @@ function blockConfirmsEmpty(block: ModelBlock): boolean {
   return block.pagingTotal === null || block.pagingTotal === 0;
 }
 
-export function extractEmbedded(doc: Document, _url: string): TierExtraction {
+export function extractEmbedded(doc: Document, pageUrl: string): TierExtraction {
   const blocks = scanEmbeddedModels(doc);
   // No model blocks parsed at all, so this tier has nothing to say about the page.
   if (blocks.length === 0) {
@@ -248,7 +247,7 @@ export function extractEmbedded(doc: Document, _url: string): TierExtraction {
       role: title,
       location: pickLocation(e) || undefined,
       signals: signalsFromInsight(pickInsightText(e)),
-      source: SOURCE,
+      source: sourceFor(pageUrl),
       capturedAt: new Date().toISOString(),
     });
   }
