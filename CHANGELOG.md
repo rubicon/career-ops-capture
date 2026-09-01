@@ -5,6 +5,24 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Career-Ops Capture v0.1.5 (2026-09-01)
+
+Every capture this extension has delivered was discarded by the receiving app, which answered 200 and wrote nothing, and the extension read that as success and cleared its buffer. Four of the five fixes here are delivery and provenance bugs that all reported themselves as working. The fifth widens capture to job search pages, which LinkedIn then replaced with markup neither extractor can read. It ships anyway, because the buffer no longer lies about where the records went.
+
+### Bug Fixes
+
+* **delivery:** send the offers envelope the app reads, and stop acking phantom writes ([#77](https://github.com/rubicon/career-ops-capture/issues/77)) ([11c2f32](https://github.com/rubicon/career-ops-capture/commit/11c2f32640a0d76a8cceac134b908f1001902569)), closes [#76](https://github.com/rubicon/career-ops-capture/issues/76)
+* **delivery:** stop downgrading the sig source token to linkedin ([#73](https://github.com/rubicon/career-ops-capture/issues/73)) ([f7ea09b](https://github.com/rubicon/career-ops-capture/commit/f7ea09b6e2c7d587d76b744c1da4e47fdf7470c1)), closes [#71](https://github.com/rubicon/career-ops-capture/issues/71)
+* **linkedin:** capture job search results and label records by surface ([#75](https://github.com/rubicon/career-ops-capture/issues/75)) ([7411db0](https://github.com/rubicon/career-ops-capture/commit/7411db033828fbc7fd6b836511d66d41ebb40270)), closes [#69](https://github.com/rubicon/career-ops-capture/issues/69)
+* **linkedin:** give the recommended collection its own label ([#83](https://github.com/rubicon/career-ops-capture/issues/83)) ([40fe9e4](https://github.com/rubicon/career-ops-capture/commit/40fe9e4a548b1f089d4ca992f69d3db1ac728348)), closes [#78](https://github.com/rubicon/career-ops-capture/issues/78)
+* **content:** capture on in-app navigation, not only on page load ([#74](https://github.com/rubicon/career-ops-capture/issues/74)) ([b76de30](https://github.com/rubicon/career-ops-capture/commit/b76de307ae63c3f3302f3bdccaa7cc178c1d0779))
+
+### Known limitations
+
+* LinkedIn is rolling out a new jobs UI whose markup neither extraction tier recognizes. On an account that has it, `/jobs/` and `/jobs/search-results/` produce the red fail-loud badge instead of a capture. `/jobs/collections/recommended/` still served the old markup and extracts normally. Tracked in [#81](https://github.com/rubicon/career-ops-capture/issues/81).
+
+**Full Changelog**: https://github.com/rubicon/career-ops-capture/compare/v0.1.4...v0.1.5
+
 ## Career-Ops Capture v0.1.4 (2026-08-21)
 
 The toolbar has shown Chrome's default puzzle-piece icon since the first release, which said "abandoned side project" louder than anything in the code ever did. Popup and settings also got pulled out of default-browser-chrome and into something that looks like someone meant it. And starting with this release, the release itself ships with an installable zip attached, so "clone it and build it yourself" finally stops being the actual instructions.
@@ -14,17 +32,6 @@ The toolbar has shown Chrome's default puzzle-piece icon since the first release
 * **ui:** add extension icon set and redesign popup/options UI ([#55](https://github.com/rubicon/career-ops-capture/issues/55)) ([0265e24](https://github.com/rubicon/career-ops-capture/commit/0265e243b8b1575f30f4c6ecfc29ee2beced9fc4))
 
 **Full Changelog**: https://github.com/rubicon/career-ops-capture/compare/v0.1.3...v0.1.4
-
-## [0.1.5](https://github.com/rubicon/career-ops-capture/compare/v0.1.4...v0.1.5) (2026-09-01)
-
-
-### Bug Fixes
-
-* **content:** capture on in-app navigation, not only on page load ([#74](https://github.com/rubicon/career-ops-capture/issues/74)) ([b76de30](https://github.com/rubicon/career-ops-capture/commit/b76de307ae63c3f3302f3bdccaa7cc178c1d0779))
-* **delivery:** send the offers envelope the app reads, and stop acking phantom writes ([#77](https://github.com/rubicon/career-ops-capture/issues/77)) ([11c2f32](https://github.com/rubicon/career-ops-capture/commit/11c2f32640a0d76a8cceac134b908f1001902569)), closes [#76](https://github.com/rubicon/career-ops-capture/issues/76)
-* **delivery:** stop downgrading the sig source token to linkedin ([#73](https://github.com/rubicon/career-ops-capture/issues/73)) ([f7ea09b](https://github.com/rubicon/career-ops-capture/commit/f7ea09b6e2c7d587d76b744c1da4e47fdf7470c1)), closes [#71](https://github.com/rubicon/career-ops-capture/issues/71)
-* **linkedin:** capture job search results and label records by surface ([#75](https://github.com/rubicon/career-ops-capture/issues/75)) ([7411db0](https://github.com/rubicon/career-ops-capture/commit/7411db033828fbc7fd6b836511d66d41ebb40270)), closes [#69](https://github.com/rubicon/career-ops-capture/issues/69)
-* **linkedin:** give the recommended collection its own label ([#83](https://github.com/rubicon/career-ops-capture/issues/83)) ([40fe9e4](https://github.com/rubicon/career-ops-capture/commit/40fe9e4a548b1f089d4ca992f69d3db1ac728348)), closes [#78](https://github.com/rubicon/career-ops-capture/issues/78)
 
 ## [0.1.3](https://github.com/rubicon/career-ops-capture/compare/v0.1.2...v0.1.3) (2026-08-15)
 
