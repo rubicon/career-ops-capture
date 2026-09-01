@@ -1,6 +1,5 @@
 import type { CapturedRecord, Signals, TierExtraction } from "../../core/types";
-
-const SOURCE = "linkedin-topapplicant";
+import { sourceFor } from "./surfaces";
 
 // Confirm these against a real cards.html capture; they are the churn points.
 const CARD = "li.jobs-search-results__list-item, li.scaffold-layout__list-item, [data-job-id]";
@@ -32,7 +31,7 @@ function signalsFrom(t: string): Signals {
 // confirms an empty state; only the embedded collection payload can.
 const EMPTY_STATE_CONFIRMED = false;
 
-export function extractDom(doc: Document, _url: string): TierExtraction {
+export function extractDom(doc: Document, pageUrl: string): TierExtraction {
   const cards = Array.from(doc.querySelectorAll(CARD));
   if (cards.length === 0) {
     return {
@@ -76,7 +75,7 @@ export function extractDom(doc: Document, _url: string): TierExtraction {
       role: title,
       location: text(card.querySelector(LOC)) || undefined,
       signals: signalsFrom(insight),
-      source: SOURCE,
+      source: sourceFor(pageUrl),
       capturedAt: new Date().toISOString(),
     });
   }
