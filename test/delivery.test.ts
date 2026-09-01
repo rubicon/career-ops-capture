@@ -8,7 +8,7 @@ const rec: CapturedRecord = {
   role: "VP Marketing",
   location: "Remote",
   signals: { topApplicant: true, matchPercent: 92 },
-  source: "LinkedIn -- Top Applicant",
+  source: "linkedin-topapplicant",
   capturedAt: "t",
 };
 const cfg = { host: "127.0.0.1", port: 3000, token: "tok" };
@@ -33,7 +33,7 @@ describe("deliver", () => {
     expect(offer.url).toBe("https://www.linkedin.com/jobs/view/123/");
     expect(offer.company).toBe("Acme");
     expect(offer.location).toBe("Remote");
-    expect(offer.source).toBe("LinkedIn -- Top Applicant");
+    expect(offer.source).toBe("linkedin-topapplicant");
     // Forward-compatible: sent now, preserved once the writer enhancement lands.
     expect(offer.note).toBe("Top Applicant, 92% match");
     expect(offer.sig).toContain("prio=A");
@@ -85,5 +85,33 @@ describe("deliver", () => {
     const r = await deliver(rec, cfg, fakeFetch as any);
     expect(r.ok).toBe(false);
     expect(r.error).toContain("ECONNREFUSED");
+  });
+
+  // Returns the delivered offer for a record, so the wire value is what gets asserted.
+  const post = async (over: Partial<CapturedRecord>) => {
+    let body: any;
+    await deliver({ ...rec, ...over }, cfg, (async (_u: string, init: any) => {
+      body = JSON.parse(init.body);
+      return { ok: true, json: async () => ({ added: 1 }) };
+    }) as any);
+    return body.offers[0];
+  };
+
+  it("sig carries the extractor's source slug, not a downgraded one", async () => {
+    expect((await post({ source: "linkedin-topapplicant" })).sig).toContain(
+      "source=linkedin-topapplicant",
+    );
+  });
+
+  it("never promotes another surface to top-applicant", async () => {
+    const sig = (await post({ source: "linkedin-search", signals: {} })).sig;
+    expect(sig).toContain("source=linkedin-search");
+    expect(sig).not.toContain("topapplicant");
+  });
+
+  it("slugs a human label so the space-delimited sig stays parseable", async () => {
+    const sig = (await post({ source: "LinkedIn -- Top Applicant" })).sig;
+    expect(sig).toContain("source=linkedin-top-applicant");
+    expect(sig.split(" ").every((kv: string) => /^[a-z_]+=\S+$/.test(kv))).toBe(true);
   });
 });

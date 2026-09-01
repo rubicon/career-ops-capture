@@ -70,7 +70,13 @@ export async function deliver(
   }
 }
 
-// The machine-tag source token is a slug; the human `source` may be a label.
+// The machine-tag source token must be a single slug: `sig` is space-delimited
+// `k=v`, so a source carrying spaces would corrupt it. Extractor slugs such as
+// `linkedin-topapplicant` pass through unchanged; a human label is slugged rather
+// than reclassified, so no record ever claims a surface it did not come from.
 function sigSource(source: string): string {
-  return source.toLowerCase().includes("top applicant") ? "linkedin-topapplicant" : "linkedin";
+  return source
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
