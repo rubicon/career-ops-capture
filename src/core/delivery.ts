@@ -14,13 +14,19 @@ export type FetchImpl = (
 
 // POST one record to the career-ops API endpoint /api/explore/add.
 //
-// Verify against your running career-ops app before relying on end-to-end delivery:
-//   1. auth model. Keep the X-Career-Ops-Token header if the endpoint requires
-//      one; drop it if not. The `token` config field is retained for that.
-//   2. response shape. The API may dedup internally and report added/skipped counts
-//      rather than {captured, duplicate}. Any 2xx is treated as delivered (safe to
-//      clear from the buffer); `duplicate` is only set if the API exposes it.
-//   3. CORS/Origin for chrome-extension:// requests.
+// The endpoint reads `body.offers`, an array, and ignores everything else. A flat
+// record makes it read undefined, write nothing, and still answer 200, which is how
+// a day of captures was acked and dropped from the buffer having reached no one.
+// One record per request, rather than the whole buffer in one envelope: the route
+// answers with a count and no identities, so a batch could only be acked all or
+// nothing, and one malformed record would hold every other record hostage.
+//
+// The writer behind the route (addOffersToPipeline) reads exactly url, company,
+// title, location, source and note off each offer and discards the rest. It requires
+// url to match ^https?://. It does not dedup and never reports a duplicate.
+//
+// The route has no auth check and the app has no middleware, so the token header is
+// sent only when one is actually configured.
 export async function deliver(
   rec: CapturedRecord,
   cfg: DeliveryConfig,
@@ -28,7 +34,7 @@ export async function deliver(
 ): Promise<{ ok: boolean; duplicate: boolean; error?: string }> {
   // The API field is `title`, not `role`. note/sig are forward-compatible extras,
   // ignored by the canonical writer until the signal-preservation enhancement lands.
-  const body = {
+  const offer = {
     url: rec.url,
     company: rec.company,
     title: rec.role,
@@ -37,15 +43,27 @@ export async function deliver(
     note: deriveNote(rec.signals),
     sig: deriveSig(rec.signals, sigSource(rec.source)),
   };
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (cfg.token) headers["X-Career-Ops-Token"] = cfg.token;
   try {
     const res = await fetchImpl(`http://${cfg.host}:${cfg.port}/api/explore/add`, {
       method: "POST",
-      // Verify auth: keep this header if /api/explore/add requires one; else drop it.
-      headers: { "Content-Type": "application/json", "X-Career-Ops-Token": cfg.token },
-      body: JSON.stringify(body),
+      headers,
+      body: JSON.stringify({ offers: [offer] }),
     });
     if (!res.ok) return { ok: false, duplicate: false, error: `HTTP ${res.status ?? "error"}` };
     const j = await res.json().catch(() => ({}));
+    // `added` is the app's own count of what it wrote. Since it never dedups, a
+    // non-positive or absent count means this record was not written, whatever the
+    // status code said, and the buffer must keep it rather than ack a phantom write.
+    const added = typeof j?.added === "number" ? j.added : 0;
+    if (added < 1) {
+      return {
+        ok: false,
+        duplicate: false,
+        error: j?.error ? String(j.error) : "app accepted the request but wrote no record",
+      };
+    }
     return { ok: true, duplicate: j?.duplicate === true };
   } catch (e) {
     return { ok: false, duplicate: false, error: (e as Error).message };
