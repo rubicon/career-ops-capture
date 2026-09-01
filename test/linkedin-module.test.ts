@@ -36,12 +36,15 @@ describe("linkedInModule", () => {
 
   it("labels embedded records by the surface they came from", () => {
     const raw = fixture("top-applicant.voyager.json");
+    const RECOMMENDED = "https://www.linkedin.com/jobs/collections/recommended/";
     // Deduped, so this asserts every record carries the label and that some did.
     const at = (url: string) => [
       ...new Set(linkedInModule.extract({ doc: docWith(raw), url }).map((r) => r.source)),
     ];
     expect(at(CURATED)).toEqual(["linkedin-topapplicant"]);
     expect(at(SEARCH)).toEqual(["linkedin-search"]);
+    // Recommended is a separate collection. It is not a top-applicant result.
+    expect(at(RECOMMENDED)).toEqual(["linkedin-recommended"]);
   });
 
   it("labels DOM records by the surface they came from", () => {
