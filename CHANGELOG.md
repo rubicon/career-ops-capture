@@ -15,6 +15,17 @@ The toolbar has shown Chrome's default puzzle-piece icon since the first release
 
 **Full Changelog**: https://github.com/rubicon/career-ops-capture/compare/v0.1.3...v0.1.4
 
+## [0.1.5](https://github.com/rubicon/career-ops-capture/compare/v0.1.4...v0.1.5) (2026-09-01)
+
+
+### Bug Fixes
+
+* **content:** capture on in-app navigation, not only on page load ([#74](https://github.com/rubicon/career-ops-capture/issues/74)) ([b76de30](https://github.com/rubicon/career-ops-capture/commit/b76de307ae63c3f3302f3bdccaa7cc178c1d0779))
+* **delivery:** send the offers envelope the app reads, and stop acking phantom writes ([#77](https://github.com/rubicon/career-ops-capture/issues/77)) ([11c2f32](https://github.com/rubicon/career-ops-capture/commit/11c2f32640a0d76a8cceac134b908f1001902569)), closes [#76](https://github.com/rubicon/career-ops-capture/issues/76)
+* **delivery:** stop downgrading the sig source token to linkedin ([#73](https://github.com/rubicon/career-ops-capture/issues/73)) ([f7ea09b](https://github.com/rubicon/career-ops-capture/commit/f7ea09b6e2c7d587d76b744c1da4e47fdf7470c1)), closes [#71](https://github.com/rubicon/career-ops-capture/issues/71)
+* **linkedin:** capture job search results and label records by surface ([#75](https://github.com/rubicon/career-ops-capture/issues/75)) ([7411db0](https://github.com/rubicon/career-ops-capture/commit/7411db033828fbc7fd6b836511d66d41ebb40270)), closes [#69](https://github.com/rubicon/career-ops-capture/issues/69)
+* **linkedin:** give the recommended collection its own label ([#83](https://github.com/rubicon/career-ops-capture/issues/83)) ([40fe9e4](https://github.com/rubicon/career-ops-capture/commit/40fe9e4a548b1f089d4ca992f69d3db1ac728348)), closes [#78](https://github.com/rubicon/career-ops-capture/issues/78)
+
 ## [0.1.3](https://github.com/rubicon/career-ops-capture/compare/v0.1.2...v0.1.3) (2026-08-15)
 
 
