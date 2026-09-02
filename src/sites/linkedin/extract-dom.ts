@@ -14,6 +14,19 @@ function text(el: Element | null): string {
   return (el?.textContent ?? "").replace(/\s+/g, " ").trim();
 }
 
+// A card title wrapper holds two children: the visible label, and a screen reader
+// copy that repeats it and, on a verified company, appends a badge phrase. Reading
+// the wrapper's whole subtree reports the title twice, and the whitespace collapse
+// in text() cannot undo a duplication. Prefer the visible half; markup that carries
+// no aria-hidden half falls back to the whole subtree. Scoped to the title because
+// that is the only field carrying a duplicated accessible label. The metadata rows
+// below mix aria-hidden separators with meaningful text, where the same preference
+// would drop content rather than restore it. innerText would also skip the copy,
+// but it forces layout and is not dependable in a content script.
+function labelText(el: Element | null): string {
+  return text(el?.querySelector("[aria-hidden='true']") ?? el);
+}
+
 function signalsFrom(t: string): Signals {
   const s: Signals = {};
   if (/top applicant/i.test(t)) s.topApplicant = true;
@@ -51,7 +64,7 @@ export function extractDom(doc: Document, pageUrl: string): TierExtraction {
     const link = card.querySelector<HTMLAnchorElement>(LINK);
     const href = link?.getAttribute("href") ?? "";
     const idm = /\/jobs\/view\/(\d+)/.exec(href);
-    const title = text(card.querySelector(TITLE));
+    const title = labelText(card.querySelector(TITLE));
     const company = text(card.querySelector(SUB));
     // Same reason as the embedded tier: a churned selector empties every card, and
     // an uncounted skip makes that indistinguishable from a page with no jobs.

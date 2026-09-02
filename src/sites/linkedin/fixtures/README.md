@@ -8,7 +8,12 @@ real job IDs:
   `jobPosting` entities that LinkedIn hydrates from hidden `<code>` blocks. It is
   consumed by the tier-1 parser in `extract-embedded.ts`.
 - `cards.html` is a rendered job-card list `<ul>`. It is consumed by the tier-2
-  parser in `extract-dom.ts`.
+  parser in `extract-dom.ts`. Its last two cards carry the title wrapper shape
+  observed in the wild: a visible label marked `aria-hidden`, followed by a screen
+  reader copy that repeats the label and, on a verified company, appends a badge
+  phrase. One has a whitespace text node between the halves and the other does not,
+  because both spacings occur. Keep both when you refresh this file; reading the
+  wrapper's whole subtree reports every title twice.
 - `churned-title.voyager.json` is the same payload shape with the title key
   renamed, so every card fails the required-field guard. It pins the rule that a
   recognized page yielding zero records falls back and then fails loud.
