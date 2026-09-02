@@ -39,8 +39,26 @@ describe("extractDom", () => {
 
   it("drops no card from the healthy fixture", () => {
     const r = extractDom(doc(), CURATED);
-    expect(r.cardCount).toBe(3);
+    expect(r.cardCount).toBe(5);
     expect(r.droppedCount).toBe(0);
+  });
+
+  // The title wrapper holds the visible label and a screen reader copy that repeats
+  // it, so reading the wrapper's whole subtree reports the title twice. The copy
+  // appends a badge phrase on a verified company, and whether a space separates the
+  // two halves depends on the markup, so neither shape can be repaired after the
+  // fact.
+  it("reads the visible label once when the title carries a screen reader copy", () => {
+    const roles = extractDom(doc(), CURATED).records.map((r) => r.role);
+    expect(roles).toContain("Marketing Director");
+    expect(roles).toContain("Senior B2B Marketing Manager");
+  });
+
+  // The other half of that rule: markup with a single label has no visible half to
+  // prefer, and must keep reading the whole subtree.
+  it("leaves a title that carries no screen reader copy unchanged", () => {
+    const roles = extractDom(doc(), CURATED).records.map((r) => r.role);
+    expect(roles).toContain("Vice President of Marketing");
   });
 
   // The rendered DOM has no statement of its own that a collection is empty: no

@@ -99,7 +99,7 @@ describe("linkedInModule", () => {
   it("falls back to tier-2 DOM when tier-1 finds job cards but extracts none", () => {
     const doc = docWith(fixture("churned-title.voyager.json"), fixture("cards.html"));
     const records = linkedInModule.extract({ doc, url: CURATED });
-    expect(records.length).toBe(3);
+    expect(records.length).toBe(5);
   });
 
   it("throws ExtractorShapeError when tier-1 finds job cards and no tier extracts any", () => {
