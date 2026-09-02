@@ -34,4 +34,31 @@
       <div class="job-card-container__footer-item">Posted 3 days ago</div>
     </div>
   </li>
+  <!-- Two cards whose title wrapper holds the visible label plus a screen reader
+       copy. The copy repeats the label and, on a verified company, appends a badge
+       phrase. The first has a whitespace text node between the halves, the second
+       has none, which is why the concatenated text appears with and without a
+       separating space. -->
+  <li class="scaffold-layout__list-item" data-job-id="3904567890">
+    <div class="job-card-container">
+      <a class="job-card-list__title" href="/jobs/view/3904567890/">
+        <span aria-hidden="true">Marketing Director</span>
+        <span class="visually-hidden">Marketing Director with verification</span>
+      </a>
+      <div class="artdeco-entity-lockup__subtitle">Blue Harbor Logistics</div>
+      <div class="artdeco-entity-lockup__caption">Denver, CO (On-site)</div>
+      <div class="job-card-container__footer-item">Posted 5 days ago</div>
+    </div>
+  </li>
+  <li class="scaffold-layout__list-item" data-job-id="3905678901">
+    <div class="job-card-container">
+      <a class="job-card-list__title" href="/jobs/view/3905678901/"
+        ><span aria-hidden="true">Senior B2B Marketing Manager</span
+        ><span class="visually-hidden">Senior B2B Marketing Manager</span></a
+      >
+      <div class="artdeco-entity-lockup__subtitle">Larkfield Instruments</div>
+      <div class="artdeco-entity-lockup__caption">Boise, ID (Hybrid)</div>
+      <div class="job-card-list__insight">Easy Apply</div>
+    </div>
+  </li>
 </ul>
