@@ -1,11 +1,11 @@
 # Dependencies
-node_modules/
+node_modules
 
 # Per-issue git worktrees
 worktrees/
 
 # Build output
-dist/
+dist
 
 # Packaged store artifacts
 web-ext-artifacts/
@@ -18,6 +18,6 @@ npm-debug.log*
 # OS and editor junk
 .DS_Store
 Thumbs.db
-.vscode/
-.idea/
+.vscode
+.idea
 *.swp
