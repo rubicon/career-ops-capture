@@ -5,6 +5,20 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Career-Ops Capture v0.1.6 (2026-09-02)
+
+Every job title this extension captured came through written twice, and nothing complained. The badge stayed green, the keyword filters matched the first half of the doubled string, and the corrupted titles landed in the tracker looking like ordinary data. The cause was a selector list resolving to the wrapper that holds both the visible title and the screen reader copy of it, which are identical apart from a badge phrase. One release ago the buffer stopped lying about where the records went. This one stops the records lying about what they are.
+
+### Bug Fixes
+
+* **linkedin:** read a card title once, not with its screen reader copy ([#90](https://github.com/rubicon/career-ops-capture/issues/90)) ([2aee14e](https://github.com/rubicon/career-ops-capture/commit/2aee14e26134f35f31cadfdc0f618db31c9dc9a0)), closes [#89](https://github.com/rubicon/career-ops-capture/issues/89)
+
+### Known limitations
+
+* LinkedIn is rolling out a new jobs UI whose markup neither extraction tier recognizes. On an account that has it, `/jobs/` and `/jobs/search-results/` produce the red fail-loud badge instead of a capture. `/jobs/collections/recommended/` still served the old markup and extracts normally. Tracked in [#81](https://github.com/rubicon/career-ops-capture/issues/81).
+
+**Full Changelog**: https://github.com/rubicon/career-ops-capture/compare/v0.1.5...v0.1.6
+
 ## Career-Ops Capture v0.1.5 (2026-09-01)
 
 Every capture this extension has delivered was discarded by the receiving app, which answered 200 and wrote nothing, and the extension read that as success and cleared its buffer. Four of the five fixes here are delivery and provenance bugs that all reported themselves as working. The fifth widens capture to job search pages, which LinkedIn then replaced with markup neither extractor can read. It ships anyway, because the buffer no longer lies about where the records went.
