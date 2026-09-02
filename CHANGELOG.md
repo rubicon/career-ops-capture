@@ -47,6 +47,27 @@ The toolbar has shown Chrome's default puzzle-piece icon since the first release
 
 **Full Changelog**: https://github.com/rubicon/career-ops-capture/compare/v0.1.3...v0.1.4
 
+## [0.1.7](https://github.com/rubicon/career-ops-capture/compare/v0.1.6...v0.1.7) (2026-09-02)
+
+
+### Features
+
+* **ci:** attach the packaged extension zip to GitHub Releases ([#57](https://github.com/rubicon/career-ops-capture/issues/57)) ([568cd52](https://github.com/rubicon/career-ops-capture/commit/568cd524ff74ba267d03a02e1dc6c4094da334a6))
+* initial public release of career-ops-capture ([0ccf418](https://github.com/rubicon/career-ops-capture/commit/0ccf418b738623eb7142695c333acebd09bf7fd1))
+* **ui:** add extension icon set and redesign popup/options UI ([#55](https://github.com/rubicon/career-ops-capture/issues/55)) ([0265e24](https://github.com/rubicon/career-ops-capture/commit/0265e243b8b1575f30f4c6ecfc29ee2beced9fc4))
+
+
+### Bug Fixes
+
+* **ci:** stop requesting an Issues scope the release App does not grant ([#49](https://github.com/rubicon/career-ops-capture/issues/49)) ([c8546a6](https://github.com/rubicon/career-ops-capture/commit/c8546a6664cb9a1d87e66e943347872af4abe2f7)), closes [#48](https://github.com/rubicon/career-ops-capture/issues/48)
+* **content:** capture on in-app navigation, not only on page load ([#74](https://github.com/rubicon/career-ops-capture/issues/74)) ([b76de30](https://github.com/rubicon/career-ops-capture/commit/b76de307ae63c3f3302f3bdccaa7cc178c1d0779))
+* **delivery:** send the offers envelope the app reads, and stop acking phantom writes ([#77](https://github.com/rubicon/career-ops-capture/issues/77)) ([11c2f32](https://github.com/rubicon/career-ops-capture/commit/11c2f32640a0d76a8cceac134b908f1001902569)), closes [#76](https://github.com/rubicon/career-ops-capture/issues/76)
+* **delivery:** stop downgrading the sig source token to linkedin ([#73](https://github.com/rubicon/career-ops-capture/issues/73)) ([f7ea09b](https://github.com/rubicon/career-ops-capture/commit/f7ea09b6e2c7d587d76b744c1da4e47fdf7470c1)), closes [#71](https://github.com/rubicon/career-ops-capture/issues/71)
+* **linkedin:** capture job search results and label records by surface ([#75](https://github.com/rubicon/career-ops-capture/issues/75)) ([7411db0](https://github.com/rubicon/career-ops-capture/commit/7411db033828fbc7fd6b836511d66d41ebb40270)), closes [#69](https://github.com/rubicon/career-ops-capture/issues/69)
+* **linkedin:** fail loud when a recognized page yields zero records ([#51](https://github.com/rubicon/career-ops-capture/issues/51)) ([37e325a](https://github.com/rubicon/career-ops-capture/commit/37e325abc11a0f20d19639b2c3ebfedd7d73b2c2))
+* **linkedin:** give the recommended collection its own label ([#83](https://github.com/rubicon/career-ops-capture/issues/83)) ([40fe9e4](https://github.com/rubicon/career-ops-capture/commit/40fe9e4a548b1f089d4ca992f69d3db1ac728348)), closes [#78](https://github.com/rubicon/career-ops-capture/issues/78)
+* **linkedin:** read a card title once, not with its screen reader copy ([#90](https://github.com/rubicon/career-ops-capture/issues/90)) ([2aee14e](https://github.com/rubicon/career-ops-capture/commit/2aee14e26134f35f31cadfdc0f618db31c9dc9a0))
+
 ## [0.1.3](https://github.com/rubicon/career-ops-capture/compare/v0.1.2...v0.1.3) (2026-08-15)
 
 
