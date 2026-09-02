@@ -2,7 +2,11 @@
 node_modules
 
 # Per-issue git worktrees
-worktrees/
+/worktrees/
+
+# Agent harness scratch. Keep .claude/settings.json trackable.
+.claude/worktrees
+.claude/settings.local.json
 
 # Build output
 dist
