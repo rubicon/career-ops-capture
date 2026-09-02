@@ -1,11 +1,15 @@
 # Dependencies
-node_modules/
+node_modules
 
 # Per-issue git worktrees
-worktrees/
+/worktrees/
+
+# Agent harness scratch. Keep .claude/settings.json trackable.
+.claude/worktrees
+.claude/settings.local.json
 
 # Build output
-dist/
+dist
 
 # Packaged store artifacts
 web-ext-artifacts/
@@ -18,6 +22,6 @@ npm-debug.log*
 # OS and editor junk
 .DS_Store
 Thumbs.db
-.vscode/
-.idea/
+.vscode
+.idea
 *.swp
