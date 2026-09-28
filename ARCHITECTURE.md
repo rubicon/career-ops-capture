@@ -170,11 +170,29 @@ is used only for downstream ordering; it does not affect any scoring in career-o
 
 ## Delivery contract
 
-The request body is `{ url, company, title, location, source }`, plus
-forward-compatible `note` and `sig` fields. The field is `title`, not `role`. An
-optional `X-Career-Ops-Token` header is sent when a token is configured. The exact
-authentication and response shape of `/api/explore/add` should be verified against
-your running career-ops app; see `docs/manual-testing.md`.
+The request body is an envelope, `{ offers: [offer] }`. The route reads
+`body.offers` and ignores everything else, so a flat record makes it read
+`undefined`, write nothing, and still answer 200. That is how a day of captures
+was acked and dropped from the buffer having reached no one. One record per
+request rather than the whole buffer in one envelope: the route answers with a
+count and no identities, so a batch could only be acked all or nothing, and one
+malformed record would hold every other record hostage.
+
+Each offer carries `{ url, company, title, location, source }`, plus
+forward-compatible `note` and `sig` fields. The field is `title`, not `role`. The
+writer behind the route reads exactly those fields and discards the rest, and
+requires `url` to match `^https?://`.
+
+A 2xx is not an acknowledgement. The response's `added` count is the app's own
+count of what it wrote, and since the app never dedups, a non-positive or absent
+count means the record was not written, whatever the status said. `deliver()`
+treats that as a failure and surfaces the route's own error string, so the buffer
+keeps the record for the retry alarm rather than acking a phantom write.
+
+An optional `X-Career-Ops-Token` header is sent when a token is configured; the
+route itself has no auth check. The exact authentication and response shape of
+`/api/explore/add` should be verified against your running career-ops app; see
+`docs/manual-testing.md`.
 
 ## Cross-browser
 
