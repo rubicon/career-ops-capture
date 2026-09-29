@@ -2,7 +2,7 @@ import type { CapturedRecord, ExtractContext, SiteModule, TierExtraction } from 
 import { extractEmbedded } from "./extract-embedded";
 import { extractDom } from "./extract-dom";
 import { detectAuthState } from "./auth";
-import { isCurated } from "./surfaces";
+import { isCurated, surfaceLabels } from "./surfaces";
 
 // Thrown when no known extraction tier recognizes the page shape. Drives the
 // fail-loud red badge. Never silently drop.
@@ -28,6 +28,7 @@ function starvation(tier: TierExtraction, name: string): string | null {
 
 export const linkedInModule: SiteModule = {
   id: "linkedin",
+  surfaces: surfaceLabels(),
   matches: (url) => isCurated(url) || AUTH_RE.test(url),
   detectAuthState,
   extract(ctx: ExtractContext): CapturedRecord[] {

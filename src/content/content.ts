@@ -4,7 +4,7 @@ import { findSite, registerSite } from "../core/registry";
 import { linkedInModule } from "../sites/linkedin/index";
 import { runCapture } from "../core/capture-run";
 import { nextCaptureKey } from "../core/nav";
-import { loadSettings } from "../core/settings";
+import { loadSettings, type Settings } from "../core/settings";
 import { parseTappedPayload } from "./inject-parse";
 
 registerSite(linkedInModule);
@@ -20,10 +20,8 @@ window.addEventListener("message", (e) => {
 
 let tier3Injected = false;
 
-async function maybeInjectTier3(): Promise<void> {
-  if (tier3Injected) return;
-  const s = await loadSettings(browser.storage.local as any);
-  if (!s.tier3Enabled) return;
+async function maybeInjectTier3(s: Settings): Promise<void> {
+  if (tier3Injected || !s.tier3Enabled) return;
   tier3Injected = true;
   const el = document.createElement("script");
   el.src = browser.runtime.getURL("content/inject.js");
@@ -32,9 +30,16 @@ async function maybeInjectTier3(): Promise<void> {
 }
 
 async function capture(): Promise<void> {
-  await maybeInjectTier3();
+  // Read once per capture and use it for both gates. Reading it here rather than at
+  // startup is what makes unchecking a portal take effect in a tab that is already
+  // open: the next capture sees the new value, with no reload and no storage listener.
+  const s = await loadSettings(browser.storage.local as any);
+  await maybeInjectTier3(s);
+  const enabled = new Set(s.portals.filter((p) => p.enabled).map((p) => p.id));
   const buffer = new CaptureBuffer(browser.storage.local as any);
-  const result = await runCapture(document, location.href, buffer, findSite);
+  const result = await runCapture(document, location.href, buffer, findSite, (id) =>
+    enabled.has(id),
+  );
   // Tier 3 is staged, not live. The bridge above validates the tapped payload and
   // nothing consumes it, so this read exists only to keep the binding live. A
   // last-resort fallback would pass `tapped` into runCapture from here, after both
