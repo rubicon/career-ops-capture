@@ -72,10 +72,15 @@ no jobs. Those drive the fallback and the fail-loud behavior. The card counts cl
    whether it found no models or read models it could not turn into records, the
    parser falls back to scraping the visible job-card DOM. Still isolated-world,
    lower fidelity.
-3. **MAIN-world fetch tap, gated.** If both fail to supply a needed signal, an
-   optional MAIN-world script can observe the responses LinkedIn's own site
-   fetches. This is the only code that touches the page runtime, it is off by
-   default, and it never initiates a request of its own.
+3. **MAIN-world fetch tap, gated and staged.** An optional MAIN-world script can
+   observe the responses LinkedIn's own site fetches. This is the only code that
+   touches the page runtime, it is off by default, and it never initiates a request
+   of its own. It is not a capture tier yet. The bridge validates the tapped
+   payload and the content script holds it in memory, where nothing reads it, so
+   enabling the toggle adds the page-runtime footprint and changes nothing about
+   what is captured. Giving it a
+   consumer in `runCapture`, as the last resort the tier list above would imply, is
+   a separate decision that has not been made.
 
 If no tier recognizes the page, the module throws `ExtractorShapeError`. So does a
 tier that found job cards and extracted no record from any of them: that is a
