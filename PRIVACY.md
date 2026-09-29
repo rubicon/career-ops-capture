@@ -72,11 +72,14 @@ header. It is never transmitted anywhere else.
 ## The optional tier-3 network tap
 
 The extension includes an optional, off-by-default feature that observes
-LinkedIn's own network responses within the page to recover a signal that is not
-present in the page markup. It only observes responses that LinkedIn's own site
-already requested; it never initiates network requests of its own, and captured
-data still goes only to your loopback endpoint. This feature stays off unless you
-explicitly enable it in settings.
+LinkedIn's own network responses within the page. It only observes responses that
+LinkedIn's own site already requested; it never initiates network requests of its
+own, and captured data still goes only to your loopback endpoint. This feature
+stays off unless you explicitly enable it in settings.
+
+The feature is currently staged and inert. What it observes is validated and then
+discarded, and no captured listing is derived from it. Enabling it therefore adds
+the in-page observation described above without recovering any signal.
 
 ## Data retention and removal
 

@@ -35,7 +35,12 @@ async function capture(): Promise<void> {
   await maybeInjectTier3();
   const buffer = new CaptureBuffer(browser.storage.local as any);
   const result = await runCapture(document, location.href, buffer, findSite);
-  // last-resort tier-3 fallback would consume `tapped` here; kept minimal + gated.
+  // Tier 3 is staged, not live. The bridge above validates the tapped payload and
+  // nothing consumes it, so this read exists only to keep the binding live. A
+  // last-resort fallback would pass `tapped` into runCapture from here, after both
+  // isolated-world tiers returned no record. ARCHITECTURE.md, README.md, PRIVACY.md
+  // and docs/manual-testing.md all state the path is inert; if that changes, they
+  // change with it.
   void tapped;
   await browser.runtime.sendMessage({ kind: "capture-result", result }).catch(() => {});
 }

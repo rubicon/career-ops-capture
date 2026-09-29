@@ -103,8 +103,10 @@ the Settings link in the popup) and set:
   your career-ops endpoint requires a token; leave it blank otherwise.
 - **Soft cap.** A per-hour capture count that triggers a warning in the toolbar
   title. It never blocks capture.
-- **Tier-3 MAIN-world fetch tap.** Off by default and higher risk. Enable it only
-  if a needed signal stops appearing through the default tiers. See
+- **Tier-3 MAIN-world fetch tap.** Off by default, higher risk, and currently
+  staged rather than live. The tap runs and its payload is validated, but no
+  capture tier consumes it, so enabling it adds page-runtime footprint without
+  changing what is captured. Leave it off. See
   [ARCHITECTURE.md](ARCHITECTURE.md).
 - **Portals.** LinkedIn is the live module. Indeed and Glassdoor are shown as
   placeholders for future modules.

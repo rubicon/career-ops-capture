@@ -40,9 +40,10 @@ The fixtures under `src/sites/linkedin/fixtures/` are hand-authored placeholders
 Step 4 is where you capture a real payload and reconcile any changed field paths.
 Do this before a public release or a Web Store submission.
 
-## Tier-3, optional and higher risk
+## Tier-3, optional, higher risk, and currently inert
 
-Only if the default tiers stop yielding a required signal, enable the tier-3
-MAIN-world fetch tap in options. It wraps `window.fetch` in LinkedIn's page world,
-which anti-automation instrumentation can detect. Leave it off unless you have a
-specific reason.
+The tier-3 MAIN-world fetch tap is staged scaffolding, not a working fallback. It
+wraps `window.fetch` in LinkedIn's page world, which anti-automation
+instrumentation can detect, and nothing consumes what it observes, so enabling it
+buys no signal in exchange for that exposure. Leave it off. If the default tiers
+stop yielding a required signal, this toggle is not the fix.
