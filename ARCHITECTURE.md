@@ -76,8 +76,9 @@ no jobs. Those drive the fallback and the fail-loud behavior. The card counts cl
    observe the responses LinkedIn's own site fetches. This is the only code that
    touches the page runtime, it is off by default, and it never initiates a request
    of its own. It is not a capture tier yet. The bridge validates the tapped
-   payload and the content script then discards it, so enabling the toggle adds the
-   page-runtime footprint and changes nothing about what is captured. Giving it a
+   payload and the content script holds it in memory, where nothing reads it, so
+   enabling the toggle adds the page-runtime footprint and changes nothing about
+   what is captured. Giving it a
    consumer in `runCapture`, as the last resort the tier list above would imply, is
    a separate decision that has not been made.
 

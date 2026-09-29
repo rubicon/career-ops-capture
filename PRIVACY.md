@@ -77,9 +77,12 @@ LinkedIn's own site already requested; it never initiates network requests of it
 own, and captured data still goes only to your loopback endpoint. This feature
 stays off unless you explicitly enable it in settings.
 
-The feature is currently staged and inert. What it observes is validated and then
-discarded, and no captured listing is derived from it. Enabling it therefore adds
-the in-page observation described above without recovering any signal.
+The feature is currently staged and inert. When it is enabled, an observed
+response is validated and then held in the content script's memory for the
+lifetime of the page, where nothing reads it: no captured listing is derived from
+it, it is never written to storage, and it is never transmitted anywhere.
+Enabling the feature therefore adds the in-page observation described above
+without recovering any signal.
 
 ## Data retention and removal
 
