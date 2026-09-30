@@ -47,6 +47,13 @@ The toolbar has shown Chrome's default puzzle-piece icon since the first release
 
 **Full Changelog**: https://github.com/rubicon/career-ops-capture/compare/v0.1.3...v0.1.4
 
+## [0.1.7](https://github.com/rubicon/career-ops-capture/compare/v0.1.6...v0.1.7) (2026-09-30)
+
+
+### Features
+
+* **portals:** gate capture on the portal toggle and read surfaces from the module ([#113](https://github.com/rubicon/career-ops-capture/issues/113)) ([1c8c5ec](https://github.com/rubicon/career-ops-capture/commit/1c8c5ecec1c327cd3cbaeb24db199a3ec2368237)), closes [#109](https://github.com/rubicon/career-ops-capture/issues/109)
+
 ## [0.1.3](https://github.com/rubicon/career-ops-capture/compare/v0.1.2...v0.1.3) (2026-08-15)
 
 
