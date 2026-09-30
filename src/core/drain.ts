@@ -6,7 +6,6 @@ import { deliver, type DeliveryConfig, type FetchImpl } from "./delivery";
 // buffer injected). Per-record ack means a partial batch never double-sends.
 export interface DrainResult {
   delivered: number;
-  duplicate: number;
   failed: number;
   // The first failure's reason, carried out so the popup can show why nothing
   // arrived. A drain that fails silently is what let a broken contract look like a
@@ -21,7 +20,6 @@ export async function drainBuffer(
 ): Promise<DrainResult> {
   const records = await buffer.list();
   let delivered = 0,
-    duplicate = 0,
     failed = 0;
   let error: string | undefined;
   const ackedUrls: string[] = [];
@@ -29,24 +27,22 @@ export async function drainBuffer(
     const r = await deliver(rec, cfg, fetchImpl);
     if (r.ok) {
       ackedUrls.push(rec.url);
-      if (r.duplicate) duplicate++;
-      else delivered++;
+      delivered++;
     } else {
       failed++;
       error ??= r.error;
     }
   }
   if (ackedUrls.length) await buffer.remove(ackedUrls);
-  return { delivered, duplicate, failed, error };
+  return { delivered, failed, error };
 }
 
 // What the popup says after a send. It reports the drain's actual outcome, rather
 // than announcing success the moment the button is clicked.
 export function describeDrain(r: DrainResult | null | undefined): string {
   if (!r) return "could not reach the extension background";
-  const sent = r.delivered + r.duplicate;
-  if (r.failed === 0) return sent === 0 ? "nothing to send" : `sent ${sent}`;
+  if (r.failed === 0) return r.delivered === 0 ? "nothing to send" : `sent ${r.delivered}`;
   const why = r.error ? `: ${r.error}` : "";
-  if (sent === 0) return `none sent, ${r.failed} kept for retry${why}`;
-  return `sent ${sent}, ${r.failed} kept for retry${why}`;
+  if (r.delivered === 0) return `none sent, ${r.failed} kept for retry${why}`;
+  return `sent ${r.delivered}, ${r.failed} kept for retry${why}`;
 }
