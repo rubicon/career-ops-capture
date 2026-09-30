@@ -3,7 +3,6 @@ import type { StorageArea } from "./buffer";
 export interface PortalSetting {
   id: string;
   enabled: boolean;
-  surfaces: string[];
 }
 export interface Settings {
   token: string;
@@ -22,11 +21,12 @@ export function defaultSettings(): Settings {
     port: 3000,
     softCapPerHour: 60,
     tier3Enabled: false,
-    // Multi-portal from day one; LinkedIn is the only live module in v1.
+    // Multi-portal from day one; LinkedIn is the only live module in v1. Which
+    // surfaces a portal claims is the module's own metadata, not a stored copy.
     portals: [
-      { id: "linkedin", enabled: true, surfaces: ["top-applicant", "recommended"] },
-      { id: "indeed", enabled: false, surfaces: [] },
-      { id: "glassdoor", enabled: false, surfaces: [] },
+      { id: "linkedin", enabled: true },
+      { id: "indeed", enabled: false },
+      { id: "glassdoor", enabled: false },
     ],
   };
 }

@@ -159,10 +159,18 @@ the shell does not change.
    already captured, so moving between cards does not re-extract.
 2. `detectAuthState` gates the run. If it sees a login wall or a logged-out
    marker, the run stops and the popup offers a re-authentication prompt.
-3. `extract` produces normalized `CapturedRecord`s with signals. They are deduped
+3. The portal gate runs next. A portal unchecked on the options page stops here,
+   before `extract`, and the run reports `portal-disabled`. The order is the point:
+   the auth check is ahead of it, so a disabled portal still reports a login wall and
+   still gets its re-login prompt, because that is about your session rather than
+   about capture; and `extract` is behind it, so a disabled portal cannot paint the
+   fail-loud shape-error badge for a page it was never going to read. The content
+   script reads the setting once per capture, so unchecking a portal takes effect on
+   the next capture in a tab that is already open, with no reload.
+4. `extract` produces normalized `CapturedRecord`s with signals. They are deduped
    locally by URL and written to the capture buffer in `chrome.storage.local`. The
    badge shows the count. Nothing has left the page.
-4. When you click Send captures in the popup, the service worker drains the buffer:
+5. When you click Send captures in the popup, the service worker drains the buffer:
    each record is POSTed to `http://127.0.0.1:<port>/api/explore/add`, and a
    record is removed from the buffer only after a successful acknowledgement.
    Failures stay buffered and retry on the next click and on a periodic alarm.

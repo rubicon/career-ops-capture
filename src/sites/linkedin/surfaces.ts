@@ -12,6 +12,13 @@ const SURFACES: ReadonlyArray<readonly [RegExp, string]> = [
   [/linkedin\.com\/jobs\/search-results/i, "linkedin-search"],
 ];
 
+// Every label the table can produce, in table order. Exposed so a UI can tell the
+// user which surfaces this module claims without keeping a copy of the list: issue
+// #109 was exactly that copy, two surfaces stale in stored settings.
+export function surfaceLabels(): string[] {
+  return SURFACES.map(([, label]) => label);
+}
+
 export function isCurated(url: string): boolean {
   return SURFACES.some(([re]) => re.test(url));
 }

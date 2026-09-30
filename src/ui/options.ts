@@ -1,5 +1,11 @@
 import { browser } from "../platform/browser";
 import { loadSettings, saveSettings, type Settings } from "../core/settings";
+import { registerSite, siteById } from "../core/registry";
+import { linkedInModule } from "../sites/linkedin/index";
+
+// Registered here for the same reason the content script registers it: the surfaces
+// shown beside a portal are the module's own, never a copy kept in settings.
+registerSite(linkedInModule);
 
 const storage = () => browser.storage.local as any;
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -22,10 +28,11 @@ async function render(): Promise<void> {
     cb.checked = p.enabled;
     cb.disabled = !live;
     label.append(cb, " ", p.id);
-    if (live && p.surfaces.length) {
+    const claimed = siteById(p.id)?.surfaces ?? [];
+    if (claimed.length) {
       const surfaces = document.createElement("span");
       surfaces.style.color = "#888";
-      surfaces.textContent = ` (${p.surfaces.join(", ")})`;
+      surfaces.textContent = ` (${claimed.join(", ")})`;
       label.append(surfaces);
     } else if (!live) {
       label.append(" (coming soon)");

@@ -108,8 +108,12 @@ the Settings link in the popup) and set:
   capture tier consumes it, so enabling it adds page-runtime footprint without
   changing what is captured. Leave it off. See
   [ARCHITECTURE.md](ARCHITECTURE.md).
-- **Portals.** LinkedIn is the live module. Indeed and Glassdoor are shown as
-  placeholders for future modules.
+- **Portals.** LinkedIn is the live module. Unchecking it stops capture on the
+  next page the content script would have captured, including in tabs already
+  open; you are still told when your session has expired. The surfaces listed
+  beside a portal are read from its module, not stored, so they cannot fall behind
+  the routes it actually claims. Indeed and Glassdoor are shown as placeholders for
+  future modules.
 
 ## Usage
 

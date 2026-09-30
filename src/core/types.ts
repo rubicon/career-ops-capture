@@ -50,6 +50,9 @@ export interface ExtractContext {
 
 export interface SiteModule {
   id: string;
+  // The provenance labels this module can attach to a record, for display. Read
+  // from the module rather than stored, so it cannot drift from the routes.
+  surfaces: readonly string[];
   matches(url: string): boolean;
   extract(ctx: ExtractContext): CapturedRecord[];
   detectAuthState(ctx: ExtractContext): AuthState;
