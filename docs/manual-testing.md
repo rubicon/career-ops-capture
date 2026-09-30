@@ -29,8 +29,11 @@ covers the end-to-end path that needs a real browser and a running career-ops ap
    the accessors as described in `src/sites/linkedin/fixtures/README.md`.
 5. Open the popup and click Send captures. The badge clears and your career-ops
    app receives the listings.
-6. Reopen the same page and send again. Your career-ops app should dedupe, so no
-   duplicate leads appear.
+6. Reopen the same page and send again. The app does not dedupe, so expect a second
+   copy of any listing you send twice. What you are checking here is that the buffer
+   dedupes: reopening the page should not add a second copy of a listing that is
+   still buffered, and once a listing has been sent and cleared, capturing it again
+   and sending it again will add it again.
 7. Log out of LinkedIn and reopen the curated page. The popup should show a Log in
    to LinkedIn button and no capture should occur.
 

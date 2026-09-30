@@ -48,6 +48,25 @@ describe("deliver", () => {
     expect(r.ok).toBe(false);
   });
 
+  // Issue #110 removed the `duplicate` field deliver() used to read off the response.
+  // The reason it was safe to remove is this: the ack rule keys on `added`, so if the
+  // app is ever changed to dedup, the shape it would most likely answer with is still
+  // read as "nothing was written" and the record is still kept for retry. Pinned here
+  // so a future reader does not reinstate the field believing it bought this.
+  it("a dedup-shaped response that wrote nothing is still a failure", async () => {
+    const fakeFetch = async () =>
+      ({ ok: true, json: async () => ({ added: 0, duplicate: true }) }) as any;
+    const r = await deliver(rec, cfg, fakeFetch as any);
+    expect(r.ok).toBe(false);
+    expect(r.error).toContain("wrote no record");
+  });
+
+  it("a dedup-shaped response that did write is a delivery", async () => {
+    const fakeFetch = async () =>
+      ({ ok: true, json: async () => ({ added: 1, duplicate: true }) }) as any;
+    expect((await deliver(rec, cfg, fakeFetch as any)).ok).toBe(true);
+  });
+
   it("2xx with no added field at all is a failure", async () => {
     const fakeFetch = async () => ({ ok: true, json: async () => ({}) }) as any;
     expect((await deliver(rec, cfg, fakeFetch as any)).ok).toBe(false);

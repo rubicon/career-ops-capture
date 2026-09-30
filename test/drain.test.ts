@@ -56,6 +56,17 @@ describe("drainBuffer", () => {
     expect(await b.count()).toBe(2);
   });
 
+  it("keeps a record the app reported as a duplicate without writing it", async () => {
+    const b = new CaptureBuffer(mem());
+    await b.add([rec("u1")]);
+    const dupNoWrite = async () =>
+      ({ ok: true, json: async () => ({ added: 0, duplicate: true }) }) as any;
+    const r = await drainBuffer(b, cfg, dupNoWrite as any);
+    expect(r.delivered).toBe(0);
+    expect(r.failed).toBe(1);
+    expect(await b.count()).toBe(1);
+  });
+
   it("carries the first failure's reason out for the popup", async () => {
     const b = new CaptureBuffer(mem());
     await b.add([rec("u1")]);
@@ -83,15 +94,15 @@ describe("drainBuffer", () => {
 
 describe("describeDrain", () => {
   it("reports a clean send", () =>
-    expect(describeDrain({ delivered: 3, duplicate: 0, failed: 0 })).toBe("sent 3"));
+    expect(describeDrain({ delivered: 3, failed: 0 })).toBe("sent 3"));
   it("reports an empty buffer", () =>
-    expect(describeDrain({ delivered: 0, duplicate: 0, failed: 0 })).toBe("nothing to send"));
+    expect(describeDrain({ delivered: 0, failed: 0 })).toBe("nothing to send"));
   it("never says sent when nothing was written", () =>
-    expect(describeDrain({ delivered: 0, duplicate: 0, failed: 2, error: "wrote no record" })).toBe(
+    expect(describeDrain({ delivered: 0, failed: 2, error: "wrote no record" })).toBe(
       "none sent, 2 kept for retry: wrote no record",
     ));
   it("reports a partial send", () =>
-    expect(describeDrain({ delivered: 1, duplicate: 0, failed: 1, error: "down" })).toBe(
+    expect(describeDrain({ delivered: 1, failed: 1, error: "down" })).toBe(
       "sent 1, 1 kept for retry: down",
     ));
   it("reports a background that never answered", () =>

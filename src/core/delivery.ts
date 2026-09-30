@@ -23,7 +23,9 @@ export type FetchImpl = (
 //
 // The writer behind the route (addOffersToPipeline) reads exactly url, company,
 // title, location, source and note off each offer and discards the rest. It requires
-// url to match ^https?://. It does not dedup and never reports a duplicate.
+// url to match ^https?://. It does not dedup and never reports a duplicate, which is
+// why the ack below keys on `added` alone: there is no duplicate flag to read, and a
+// result field for one only invited a future reader to trust a path that cannot occur.
 //
 // The route has no auth check and the app has no middleware, so the token header is
 // sent only when one is actually configured.
@@ -31,7 +33,7 @@ export async function deliver(
   rec: CapturedRecord,
   cfg: DeliveryConfig,
   fetchImpl: FetchImpl,
-): Promise<{ ok: boolean; duplicate: boolean; error?: string }> {
+): Promise<{ ok: boolean; error?: string }> {
   // The API field is `title`, not `role`. note/sig are forward-compatible extras,
   // ignored by the canonical writer until the signal-preservation enhancement lands.
   const offer = {
@@ -51,22 +53,24 @@ export async function deliver(
       headers,
       body: JSON.stringify({ offers: [offer] }),
     });
-    if (!res.ok) return { ok: false, duplicate: false, error: `HTTP ${res.status ?? "error"}` };
+    if (!res.ok) return { ok: false, error: `HTTP ${res.status ?? "error"}` };
     const j = await res.json().catch(() => ({}));
     // `added` is the app's own count of what it wrote. Since it never dedups, a
     // non-positive or absent count means this record was not written, whatever the
     // status code said, and the buffer must keep it rather than ack a phantom write.
+    // This is also the rule that keeps the extension safe if the app ever starts
+    // deduping: a response that reports a duplicate and wrote nothing still fails
+    // here, and the record is still kept.
     const added = typeof j?.added === "number" ? j.added : 0;
     if (added < 1) {
       return {
         ok: false,
-        duplicate: false,
         error: j?.error ? String(j.error) : "app accepted the request but wrote no record",
       };
     }
-    return { ok: true, duplicate: j?.duplicate === true };
+    return { ok: true };
   } catch (e) {
-    return { ok: false, duplicate: false, error: (e as Error).message };
+    return { ok: false, error: (e as Error).message };
   }
 }
 
