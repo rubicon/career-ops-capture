@@ -5,6 +5,13 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.7](https://github.com/rubicon/career-ops-capture/compare/v0.1.6...v0.1.7) (2026-10-12)
+
+
+### Features
+
+* **portals:** gate capture on the portal toggle and read surfaces from the module ([#113](https://github.com/rubicon/career-ops-capture/issues/113)) ([1c8c5ec](https://github.com/rubicon/career-ops-capture/commit/1c8c5ecec1c327cd3cbaeb24db199a3ec2368237)), closes [#109](https://github.com/rubicon/career-ops-capture/issues/109)
+
 ## Career-Ops Capture v0.1.6 (2026-09-02)
 
 Every job title this extension captured came through written twice, and nothing complained. The badge stayed green, the keyword filters matched the first half of the doubled string, and the corrupted titles landed in the tracker looking like ordinary data. The cause was a selector list resolving to the wrapper that holds both the visible title and the screen reader copy of it, which are identical apart from a badge phrase. One release ago the buffer stopped lying about where the records went. This one stops the records lying about what they are.
