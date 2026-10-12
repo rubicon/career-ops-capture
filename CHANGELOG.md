@@ -5,14 +5,14 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.7](https://github.com/rubicon/career-ops-capture/compare/v0.1.6...v0.1.7) (2026-10-12)
+## [0.1.7] - 2026-10-12
 
 
 ### Features
 
 * **portals:** gate capture on the portal toggle and read surfaces from the module ([#113](https://github.com/rubicon/career-ops-capture/issues/113)) ([1c8c5ec](https://github.com/rubicon/career-ops-capture/commit/1c8c5ecec1c327cd3cbaeb24db199a3ec2368237)), closes [#109](https://github.com/rubicon/career-ops-capture/issues/109)
 
-## Career-Ops Capture v0.1.6 (2026-09-02)
+## [0.1.6] - 2026-09-02
 
 Every job title this extension captured came through written twice, and nothing complained. The badge stayed green, the keyword filters matched the first half of the doubled string, and the corrupted titles landed in the tracker looking like ordinary data. The cause was a selector list resolving to the wrapper that holds both the visible title and the screen reader copy of it, which are identical apart from a badge phrase. One release ago the buffer stopped lying about where the records went. This one stops the records lying about what they are.
 
@@ -26,7 +26,7 @@ Every job title this extension captured came through written twice, and nothing 
 
 **Full Changelog**: https://github.com/rubicon/career-ops-capture/compare/v0.1.5...v0.1.6
 
-## Career-Ops Capture v0.1.5 (2026-09-01)
+## [0.1.5] - 2026-09-01
 
 Every capture this extension has delivered was discarded by the receiving app, which answered 200 and wrote nothing, and the extension read that as success and cleared its buffer. Four of the five fixes here are delivery and provenance bugs that all reported themselves as working. The fifth widens capture to job search pages, which LinkedIn then replaced with markup neither extractor can read. It ships anyway, because the buffer no longer lies about where the records went.
 
@@ -44,7 +44,7 @@ Every capture this extension has delivered was discarded by the receiving app, w
 
 **Full Changelog**: https://github.com/rubicon/career-ops-capture/compare/v0.1.4...v0.1.5
 
-## Career-Ops Capture v0.1.4 (2026-08-21)
+## [0.1.4] - 2026-08-21
 
 The toolbar has shown Chrome's default puzzle-piece icon since the first release, which said "abandoned side project" louder than anything in the code ever did. Popup and settings also got pulled out of default-browser-chrome and into something that looks like someone meant it. And starting with this release, the release itself ships with an installable zip attached, so "clone it and build it yourself" finally stops being the actual instructions.
 
@@ -54,21 +54,21 @@ The toolbar has shown Chrome's default puzzle-piece icon since the first release
 
 **Full Changelog**: https://github.com/rubicon/career-ops-capture/compare/v0.1.3...v0.1.4
 
-## [0.1.3](https://github.com/rubicon/career-ops-capture/compare/v0.1.2...v0.1.3) (2026-08-15)
+## [0.1.3] - 2026-08-15
 
 
 ### Bug Fixes
 
 * **linkedin:** fail loud when a recognized page yields zero records ([#51](https://github.com/rubicon/career-ops-capture/issues/51)) ([37e325a](https://github.com/rubicon/career-ops-capture/commit/37e325abc11a0f20d19639b2c3ebfedd7d73b2c2))
 
-## [0.1.2](https://github.com/rubicon/career-ops-capture/compare/v0.1.1...v0.1.2) (2026-08-12)
+## [0.1.2] - 2026-08-12
 
 
 ### Bug Fixes
 
 * **ci:** stop requesting an Issues scope the release App does not grant ([#49](https://github.com/rubicon/career-ops-capture/issues/49)) ([c8546a6](https://github.com/rubicon/career-ops-capture/commit/c8546a6664cb9a1d87e66e943347872af4abe2f7)), closes [#48](https://github.com/rubicon/career-ops-capture/issues/48)
 
-## [0.1.1](https://github.com/rubicon/career-ops-capture/compare/v0.1.0...v0.1.1) (2026-07-04)
+## [0.1.1] - 2026-07-04
 
 
 ### Features
@@ -102,5 +102,12 @@ Initial public release.
 - A Firefox manifest variant, a unit-test suite over parsing and delivery logic,
   a deterministic manifest validator, and a Web Store packaging script.
 
-[Unreleased]: https://github.com/rubicon/career-ops-capture/compare/v0.1.4...HEAD
+[Unreleased]: https://github.com/rubicon/career-ops-capture/compare/v0.1.7...HEAD
+[0.1.7]: https://github.com/rubicon/career-ops-capture/compare/v0.1.6...v0.1.7
+[0.1.6]: https://github.com/rubicon/career-ops-capture/compare/v0.1.5...v0.1.6
+[0.1.5]: https://github.com/rubicon/career-ops-capture/compare/v0.1.4...v0.1.5
+[0.1.4]: https://github.com/rubicon/career-ops-capture/compare/v0.1.3...v0.1.4
+[0.1.3]: https://github.com/rubicon/career-ops-capture/compare/v0.1.2...v0.1.3
+[0.1.2]: https://github.com/rubicon/career-ops-capture/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/rubicon/career-ops-capture/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/rubicon/career-ops-capture/releases/tag/v0.1.0
