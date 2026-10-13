@@ -5,6 +5,13 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.8](https://github.com/rubicon/career-ops-capture/compare/v0.1.7...v0.1.8) (2026-10-13)
+
+
+### Fixed
+
+* **linkedin:** read the component-keyed search results cards ([#123](https://github.com/rubicon/career-ops-capture/issues/123)) ([750d5a0](https://github.com/rubicon/career-ops-capture/commit/750d5a0efd383c88551aacbf39fb96a7905a39e5)), closes [#81](https://github.com/rubicon/career-ops-capture/issues/81)
+
 ## [0.1.7] - 2026-10-12
 
 
