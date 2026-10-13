@@ -14,16 +14,20 @@ real job IDs:
   phrase. One has a whitespace text node between the halves and the other does not,
   because both spacings occur. Keep both when you refresh this file; reading the
   wrapper's whole subtree reports every title twice.
-- `search-results-cards.html` is the one exception to "not a real capture": eight
-  cards from a real `/jobs/search-results/` page served by LinkedIn's component-keyed
-  UI (issue #81), with every class, style, identifier and image source removed and
-  the company names and job ids replaced by synthetic ones. It is consumed by the
-  component-card reader in `extract-dom.ts`. That UI has no `<code>` payload, no
-  stable class names and no job link on a card; the job id lives in the card's
-  `componentkey`, which also sits on an inner wrapper, so the fixture keeps both. The
-  eight cards cover a title with and without the screen reader "(Verified job)" copy,
-  a title with trailing whitespace, and cards with and without salary, benefit and
-  signal lines. When you refresh it, keep that spread.
+- `search-results-cards.html` is eight cards in the markup of LinkedIn's component-keyed
+  search UI (issue #81), consumed by the component-card reader in `extract-dom.ts`. The
+  structure is copied from a real `/jobs/search-results/` capture. Everything a reader
+  could attribute to a real posting is synthetic: company names (prefixed "Example"),
+  job ids, titles and locations were replaced, and every class, style, image source and
+  aria-label was removed. That UI has no `<code>` payload, no stable class names and no
+  job link on a card. The job id lives in the card's `componentkey`, which also sits on
+  an inner wrapper, so the fixture keeps both. A card's first three `<p>` elements are
+  its title, company and location, in that order, and every later `<p>` is a signal
+  line; the reader depends on that order because nothing else about those fields is
+  stable. The title `<p>` holds a screen reader copy (with "(Verified job)" on a
+  verified company) and a visible `aria-hidden` copy. The eight cards cover a title
+  with and without that phrase, a title with trailing whitespace, and cards with and
+  without salary, benefit and signal lines. When you refresh it, keep that spread.
 - `churned-title.voyager.json` is the same payload shape with the title key
   renamed, so every card fails the required-field guard. It pins the rule that a
   recognized page yielding zero records falls back and then fails loud.

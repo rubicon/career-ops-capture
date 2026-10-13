@@ -134,26 +134,14 @@ describe("extractDom on the component-keyed search results", () => {
       r.location,
     ]);
     expect(rows).toEqual([
-      [
-        "Chief Marketing & Sales Officer",
-        "Harborview Speech Association",
-        "Rockville, MD (Hybrid)",
-      ],
-      ["Chief Marketing Officer", "Tally", "United States (Remote)"],
-      [
-        "Cheif Marketing Officer",
-        "Fourth Molar / Dr. Crown",
-        "Miami-Fort Lauderdale Area (Hybrid)",
-      ],
-      ["SVP Marketing", "Candlewick Credit", "United States (Remote)"],
-      ["Chief Marketing Officer", "Plain Thread Wardrobe", "Calabasas, CA (On-site)"],
-      ["Chief Marketing Officer", "Spectrum Harbor Partners", "United States (Remote)"],
-      [
-        "Head of Growth Marketing & Customer Experience",
-        "Marlin Ridge Lending",
-        "Plano, TX (On-site)",
-      ],
-      ["US Head, Glaucoma Franchise", "Northgate Biologics", "Northbrook, IL"],
+      ["Chief Brand & Sales Officer", "Example Harborview Association", "Elmstead, ZZ (Hybrid)"],
+      ["Chief Marketing Officer", "Example Quillbrook Ledger", "United States (Remote)"],
+      ["Chief Merchandise Officer", "Example Molar / Dr. Crown", "Pinecrest Coast Area (Hybrid)"],
+      ["SVP Marketing", "Example Candlewick Credit", "United States (Remote)"],
+      ["Chief Marketing Officer", "Example Plain Thread", "Oakmere, ZZ (On-site)"],
+      ["Chief Marketing Officer", "Example Spectrum Partners", "United States (Remote)"],
+      ["Head of Demand & Client Journeys", "Example Marlin Lending", "Larkfield, ZZ (On-site)"],
+      ["US Head, Aurora Franchise", "Example Northgate Biologics", "Northfield Park, ZZ"],
     ]);
   });
 
@@ -180,6 +168,36 @@ describe("extractDom on the component-keyed search results", () => {
   it("labels every record with the search surface", () => {
     const sources = new Set(extractDom(searchDoc(), SEARCH).records.map((r) => r.source));
     expect([...sources]).toEqual(["linkedin-search"]);
+  });
+
+  // The job id is the only thing the key carries, so a key that stops ending in digits
+  // is a card that cannot become a record, and must show up as dropped.
+  it("counts a card whose componentkey carries no numeric id as dropped", () => {
+    const card = (key: string) =>
+      `<div role="button" componentkey="${key}"><p>VP Marketing</p><p>Northwind Analytics</p><p>Remote</p></div>`;
+    const doc = new JSDOM(
+      `<!doctype html><body>${card("job-card-component-ref-3901234567")}${card("job-card-component-ref-")}</body>`,
+    ).window.document;
+    const r = extractDom(doc, SEARCH);
+    expect(r.cardCount).toBe(2);
+    expect(r.records.length).toBe(1);
+    expect(r.droppedCount).toBe(1);
+    const bad = new JSDOM(`<!doctype html><body>${card("job-card-component-ref-abc")}</body>`)
+      .window.document;
+    const b = extractDom(bad, SEARCH);
+    expect(b.recognized).toBe(true);
+    expect(b.droppedCount).toBe(1);
+    expect(b.records).toEqual([]);
+  });
+
+  it("counts a repeated job id as a duplicate, so the buckets account for every card", () => {
+    const card = `<div role="button" componentkey="job-card-component-ref-3901234567"><p>VP Marketing</p><p>Northwind Analytics</p><p>Remote</p></div>`;
+    const doc = new JSDOM(`<!doctype html><body>${card}${card}</body>`).window.document;
+    const r = extractDom(doc, SEARCH);
+    expect(r.cardCount).toBe(2);
+    expect(r.records.length).toBe(1);
+    expect(r.duplicateCount).toBe(1);
+    expect(r.records.length + r.droppedCount + r.duplicateCount).toBe(r.cardCount);
   });
 
   it("reports cards found and every card dropped when the card layout churns", () => {
