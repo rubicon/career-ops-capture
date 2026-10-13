@@ -32,6 +32,30 @@ describe("validate-changelog", () => {
     expect(r.status).toBe(1);
   });
 
+  it("fails on an [Unreleased] heading below the newest release", () => {
+    const r = run(
+      `${PREAMBLE}## [0.1.7] - 2026-10-12\n\n## [Unreleased]\n\n## [0.1.6] - 2026-09-02\n`,
+    );
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain("[Unreleased]");
+  });
+
+  it("fails on a house-format heading below the newest release", () => {
+    const r = run(
+      `${PREAMBLE}## [0.1.7] - 2026-10-12\n\n## Career-Ops Capture v0.1.6 (2026-09-02)\n`,
+    );
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain("Career-Ops Capture v0.1.6");
+  });
+
+  it("fails when a version is listed twice", () => {
+    const r = run(
+      `${PREAMBLE}## [0.1.7] - 2026-10-12\n\n## [0.1.6] - 2026-09-02\n\n## [0.1.6] - 2026-09-01\n`,
+    );
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain("version listed twice");
+  });
+
   it("fails when there is no release heading at all", () => {
     const r = run(`${PREAMBLE}Nothing yet.\n`);
     expect(r.status).toBe(1);
