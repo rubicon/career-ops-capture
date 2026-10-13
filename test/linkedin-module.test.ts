@@ -63,6 +63,23 @@ describe("linkedInModule", () => {
     expect(at(SEARCH)).toEqual(["linkedin-search"]);
   });
 
+  // Issue #81: the page that used to red-badge. Run through the module so the route,
+  // the tier order and the fail-loud rule are all exercised, not just the parser.
+  it("captures the component-keyed search results the new LinkedIn UI serves", () => {
+    const body = fixture("search-results-cards.html");
+    const doc = new JSDOM(`<!doctype html><body><main>${body}</main></body>`).window.document;
+    const records = linkedInModule.extract({ doc, url: SEARCH });
+    expect(records.length).toBe(8);
+    expect(new Set(records.map((r) => r.source))).toEqual(new Set(["linkedin-search"]));
+  });
+
+  it("still throws when a component-keyed page has cards but no card yields a record", () => {
+    const doc = new JSDOM(
+      '<!doctype html><body><div role="button" componentkey="job-card-component-ref-3901234567"></div></body>',
+    ).window.document;
+    expect(() => linkedInModule.extract({ doc, url: SEARCH })).toThrow(ExtractorShapeError);
+  });
+
   it("throws ExtractorShapeError when neither tier recognizes the page", () => {
     const doc = new JSDOM("<!doctype html><body><p>nothing</p></body>").window.document;
     expect(() => linkedInModule.extract({ doc, url: CURATED })).toThrow(ExtractorShapeError);
