@@ -108,7 +108,7 @@ jobs:
         run: |
           set -euo pipefail
           gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" \
-            --json title,headRefName,author,state,isCrossRepository \
+            --json title,headRefName,author,state,isCrossRepository,body \
             > "$RUNNER_TEMP/source-pr.json"
 
           state=$(jq -r '.state' "$RUNNER_TEMP/source-pr.json")
@@ -140,6 +140,12 @@ jobs:
             echo "title=$(jq -r '.title' "$RUNNER_TEMP/source-pr.json")"
             echo "branch=chore/reauthor-pr-$PR_NUMBER"
           } >> "$GITHUB_OUTPUT"
+
+          # A release-please source keeps its body: release-please finds a merged
+          # release PR by the notes block in it. The script also fails the job if that
+          # block is missing, rather than opening a PR release-please cannot see.
+          node scripts/reauthor-body.mjs "$RUNNER_TEMP/source-pr.json" "$PR_NUMBER" \
+            > "$RUNNER_TEMP/reauthor-body.md"
 
       - name: Squash the PR's diff onto a new branch
         env:
@@ -200,9 +206,7 @@ jobs:
             --title "$TITLE" \
             --head "$BRANCH" \
             --base main \
-            --body "Reauthored copy of #$PR_NUMBER's diff, authored and signed as the maintainer instead of the bot. The content is unchanged, and this goes through the same required checks and the same human merge as the original.
-
-          #$PR_NUMBER is left open on purpose. Closing it is a merge-time judgment call, and closing it early tells Dependabot the advisory was declined, so it will not raise a fresh PR for the same one.")
+            --body-file "$RUNNER_TEMP/reauthor-body.md")
 
           # Closing keywords only close issues, never pull requests, so the
           # original is linked by comment rather than by a keyword that would
