@@ -1,4 +1,5 @@
 import type { CapturedRecord, Signals, TierExtraction } from "../../core/types";
+import { ExtractorShapeError } from "./shape-error";
 import { sourceFor } from "./surfaces";
 
 // Confirm these against a real cards.html capture; they are the churn points.
@@ -32,7 +33,10 @@ function labelText(el: Element | null): string {
 // the componentkey on the card's button wrapper. The same key also sits on an inner
 // div, which is why the selector is pinned to the button. Title, company and location
 // are the card's first three paragraphs, in that order, because nothing else about
-// them is stable; every paragraph after those is a signal line.
+// them is stable. The title paragraph is the one carrying the aria-hidden copy, so a
+// badge line ahead of it is skipped rather than read as the title; company and
+// location are the two paragraphs after it, and every paragraph after those is a
+// signal line.
 const COMPONENT_CARD = "[role='button'][componentkey^='job-card-component-ref-']";
 const COMPONENT_KEY = /^job-card-component-ref-(\d+)$/;
 
@@ -58,12 +62,25 @@ function readLegacyCard(card: Element): CardFields {
 }
 
 function readComponentCard(card: Element): CardFields {
-  const [title, company, location, ...signals] = Array.from(card.querySelectorAll("p"));
+  const paragraphs = Array.from(card.querySelectorAll("p"));
+  // A card with no text at all is left to the caller to count as dropped. A card with
+  // text that is too short to hold title, company and location has changed layout.
+  if (paragraphs.length === 0) {
+    return { id: undefined, title: "", company: "", location: "", insight: "" };
+  }
+  const found = paragraphs.findIndex((p) => p.querySelector("[aria-hidden='true']"));
+  const at = found === -1 ? 0 : found;
+  const [title, company, location, ...signals] = paragraphs.slice(at);
+  if (!title || !company || !location) {
+    throw new ExtractorShapeError(
+      `LinkedIn extractor needs update: a job card has ${paragraphs.length} paragraphs, too few to hold a title, company and location after the title at position ${at}`,
+    );
+  }
   return {
     id: COMPONENT_KEY.exec(card.getAttribute("componentkey") ?? "")?.[1],
-    title: labelText(title ?? null),
-    company: text(company ?? null),
-    location: text(location ?? null),
+    title: labelText(title),
+    company: text(company),
+    location: text(location),
     insight: signals.map((e) => text(e)).join(" "),
   };
 }

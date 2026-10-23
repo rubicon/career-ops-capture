@@ -2,16 +2,10 @@ import type { CapturedRecord, ExtractContext, SiteModule, TierExtraction } from 
 import { extractEmbedded } from "./extract-embedded";
 import { extractDom } from "./extract-dom";
 import { detectAuthState } from "./auth";
+import { ExtractorShapeError } from "./shape-error";
 import { isCurated, surfaceLabels } from "./surfaces";
 
-// Thrown when no known extraction tier recognizes the page shape. Drives the
-// fail-loud red badge. Never silently drop.
-export class ExtractorShapeError extends Error {
-  constructor(msg = "LinkedIn extractor recognized no known shape, needs update") {
-    super(msg);
-    this.name = "ExtractorShapeError";
-  }
-}
+export { ExtractorShapeError };
 
 // Also claim LinkedIn's auth surfaces: a passive open of a curated URL can redirect
 // to a login wall. Claiming these lets detectAuthState() report
