@@ -108,7 +108,7 @@ jobs:
         run: |
           set -euo pipefail
           gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" \
-            --json title,headRefName,author,state,isCrossRepository \
+            --json title,headRefName,author,state,isCrossRepository,body,labels \
             > "$RUNNER_TEMP/source-pr.json"
 
           state=$(jq -r '.state' "$RUNNER_TEMP/source-pr.json")
@@ -136,10 +136,23 @@ jobs:
             exit 1
           fi
 
+          # release-please only recognizes a merged release PR whose head branch
+          # matches its own pattern and that carries its pending label, so the branch
+          # name and labels depend on the source. The script fails the job when a
+          # release-please source cannot keep a recognizable branch shape.
+          node scripts/reauthor-meta.mjs "$RUNNER_TEMP/source-pr.json" "$PR_NUMBER" \
+            > "$RUNNER_TEMP/reauthor-meta.json"
+
           {
             echo "title=$(jq -r '.title' "$RUNNER_TEMP/source-pr.json")"
-            echo "branch=chore/reauthor-pr-$PR_NUMBER"
+            echo "branch=$(jq -r '.branch' "$RUNNER_TEMP/reauthor-meta.json")"
           } >> "$GITHUB_OUTPUT"
+
+          # A release-please source keeps its body: release-please finds a merged
+          # release PR by the notes block in it. The script also fails the job if that
+          # block is missing, rather than opening a PR release-please cannot see.
+          node scripts/reauthor-body.mjs "$RUNNER_TEMP/source-pr.json" "$PR_NUMBER" \
+            > "$RUNNER_TEMP/reauthor-body.md"
 
       - name: Squash the PR's diff onto a new branch
         env:
@@ -196,13 +209,16 @@ jobs:
         run: |
           set -euo pipefail
           git push origin "$BRANCH"
+          label_args=()
+          while IFS= read -r label; do
+            label_args+=(--label "$label")
+          done < <(jq -r '.labels[]' "$RUNNER_TEMP/reauthor-meta.json")
           url=$(gh pr create --repo "$GITHUB_REPOSITORY" \
+            ${label_args[@]+"${label_args[@]}"} \
             --title "$TITLE" \
             --head "$BRANCH" \
             --base main \
-            --body "Reauthored copy of #$PR_NUMBER's diff, authored and signed as the maintainer instead of the bot. The content is unchanged, and this goes through the same required checks and the same human merge as the original.
-
-          #$PR_NUMBER is left open on purpose. Closing it is a merge-time judgment call, and closing it early tells Dependabot the advisory was declined, so it will not raise a fresh PR for the same one.")
+            --body-file "$RUNNER_TEMP/reauthor-body.md")
 
           # Closing keywords only close issues, never pull requests, so the
           # original is linked by comment rather than by a keyword that would
