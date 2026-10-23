@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { JSDOM } from "jsdom";
 import { extractDom } from "../src/sites/linkedin/extract-dom";
+import { ExtractorShapeError } from "../src/sites/linkedin/index";
 
 function doc(): Document {
   const body = readFileSync("src/sites/linkedin/fixtures/cards.html", "utf-8");
@@ -210,5 +211,33 @@ describe("extractDom on the component-keyed search results", () => {
     expect(r.cardCount).toBe(1);
     expect(r.droppedCount).toBe(1);
     expect(r.records).toEqual([]);
+  });
+
+  // The title is found by its screen reader copy, not by being the first paragraph, so
+  // a badge line ahead of it cannot shift the company and location into the wrong
+  // fields.
+  it("finds the title by its screen reader copy when a badge paragraph leads the card", () => {
+    const card =
+      '<div role="button" componentkey="job-card-component-ref-3901234567">' +
+      "<p>Promoted</p>" +
+      '<p><span>VP Marketing (Verified job)</span><span aria-hidden="true">VP Marketing</span></p>' +
+      "<p>Northwind Analytics</p><p>Remote</p><p>Easy Apply</p></div>";
+    const doc = new JSDOM(`<!doctype html><body>${card}</body>`).window.document;
+    const r = extractDom(doc, SEARCH);
+    expect(r.records.map((x) => [x.role, x.company, x.location])).toEqual([
+      ["VP Marketing", "Northwind Analytics", "Remote"],
+    ]);
+    expect(r.records[0]?.signals).toEqual({ easyApply: true });
+  });
+
+  // Fewer paragraphs than title, company and location means the layout moved. Reading
+  // them positionally anyway would report a location as a company.
+  it("throws ExtractorShapeError when too few paragraphs follow the title", () => {
+    const card =
+      '<div role="button" componentkey="job-card-component-ref-3901234567">' +
+      '<p><span>VP Marketing (Verified job)</span><span aria-hidden="true">VP Marketing</span></p>' +
+      "<p>Northwind Analytics</p></div>";
+    const doc = new JSDOM(`<!doctype html><body>${card}</body>`).window.document;
+    expect(() => extractDom(doc, SEARCH)).toThrow(ExtractorShapeError);
   });
 });
